@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -17,11 +20,16 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+#pragma warning disable ASP0014
+app.UseEndpoints((IEndpointRouteBuilder endpoints) => {
+    endpoints.MapControllers();
+});
+#pragma warning restore ASP0014
+
+// app.MapControllerRoute(
+//     name: "default",
+//     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

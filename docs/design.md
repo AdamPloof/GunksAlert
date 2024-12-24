@@ -122,7 +122,7 @@ A `Crag` is  the location of a climbing area. When fetching forecast data and we
 
 | Field             | Data type | Description                     |
 | ----------------- | --------- | --------------------------------|
-| Id                | int       | Primary key                  |
+| Id                | int       | Primary key                     |
 | Name              | string    | The crag's name, e.g. The Gunks |
 | Longitude         | double    | Longitude of forecast location  |
 | Latitude          | double    | Latitude of forecast location   |
