@@ -22,5 +22,9 @@ public class DailyCondition {
 
     [StringLength(3)]
     [Required]
-    public required string Icon { get; set; }
+    public required string IconDay { get; set; }
+
+    [StringLength(3)]
+    [Required]
+    public required string IconNight { get; set; }
 }

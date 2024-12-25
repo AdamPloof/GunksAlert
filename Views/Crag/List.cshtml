@@ -1,0 +1,61 @@
+@model IEnumerable<GunksAlert.Models.Crag>
+
+@{
+    ViewData["Title"] = "Crags";
+}
+
+<h2>Crags</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="row">
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Longitude)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Latitude)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.City)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StateProvince)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Country)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Crag crag in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(_ => crag.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(_ => crag.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(_ => crag.Longitude)
+                </td>
+                <td>
+                    @Html.DisplayFor(_ => crag.Latitude)
+                </td>
+                <td>
+                    @Html.DisplayFor(_ => crag.City)
+                </td>
+                <td>
+                    @Html.DisplayFor(_ => crag.StateProvince)
+                </td>
+                <td>
+                    @Html.DisplayFor(_ => crag.Country)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

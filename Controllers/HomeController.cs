@@ -6,8 +6,7 @@ using GunksAlert.Models;
 
 namespace GunksAlert.Controllers;
 
-public class HomeController : Controller
-{
+public class HomeController : Controller {
     private readonly ILogger<HomeController> _logger;
 
     public HomeController(ILogger<HomeController> logger) {
