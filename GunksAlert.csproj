@@ -19,4 +19,19 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <DataFiles Include="var/**/*.*" />
+  </ItemGroup>
+
+  <Target Name="CopyDateFiles" AfterTargets="Build">
+    <Copy
+      SourceFiles="@(DataFiles)"
+      DestinationFolder="$(OutputPath)var/"
+    />
+  </Target>
+
+  <ItemGroup>
+    <None Include="@(DataFiles)" />
+  </ItemGroup>
+
 </Project>

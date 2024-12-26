@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,21 @@ builder.Services.AddDbContext<GunksDbContext>(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment()) {
+if (app.Environment.IsDevelopment()) {
+    using (AsyncServiceScope scope = app.Services.CreateAsyncScope()) {
+        IServiceProvider services = scope.ServiceProvider;
+        string conditionsPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "var",
+            "weatherConditions.json"
+        );
+        await DailyConditionSeeder.SeedAsync(
+            conditionsPath,
+            new GunksDbContext(services.GetRequiredService<DbContextOptions<GunksDbContext>>()),
+            app.Logger
+        );
+    }
+} else {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();

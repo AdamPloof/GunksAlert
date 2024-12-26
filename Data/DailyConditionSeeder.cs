@@ -14,18 +14,14 @@ namespace GunksAlert.Data;
 /// Seed the database with the default DailyCondition entities
 /// </summary>
 /// <seealso href="https://openweathermap.org/weather-conditions" />>
-public class DailyConditionSeeder {
-    private ILogger _logger;
-    private GunksDbContext _context;
-
-    public DailyConditionSeeder(GunksDbContext context, ILogger logger) {
-        _context = context;
-        _logger = logger;
-    }
-
-    public async Task SeedAsync(string dataPath) {
-        if (!_context.Database.EnsureCreated()) {
-            throw new ArgumentException("Can't initalize data. Database has not been created.");
+public static class DailyConditionSeeder {
+    public static async Task SeedAsync(
+        string dataPath,
+        GunksDbContext context,
+        ILogger logger
+    ) {
+        if (context.DailyConditions.Any()) {
+            return; // DailyConditions already seeded
         }
 
         if (string.IsNullOrWhiteSpace(dataPath)) {
@@ -43,20 +39,20 @@ public class DailyConditionSeeder {
             );
 
             if (conditions == null || conditions.Count == 0) {
-                _logger.LogWarning("Conditions data file is empty. No conditions were added");
+                logger.LogWarning("Conditions data file is empty. No conditions were added");
                 return;
             }
 
             foreach (DailyCondition condition in conditions) {
-                if (!await _context.Set<DailyCondition>().AnyAsync(c => c.Id == condition.Id)) {
-                    await _context.Set<DailyCondition>().AddAsync(condition);
+                if (!await context.Set<DailyCondition>().AnyAsync(c => c.Id == condition.Id)) {
+                    await context.Set<DailyCondition>().AddAsync(condition);
                 }
             }
 
-            await _context.SaveChangesAsync();
-            _logger.LogInformation($"DailyConditions added. {conditions.Count} inserted.");
+            await context.SaveChangesAsync();
+            logger.LogInformation($"DailyConditions added. {conditions.Count} inserted.");
         } catch (Exception e) {
-            _logger.LogError(e.Message);
+            logger.LogError(e.Message);
             throw;
         }
     }
