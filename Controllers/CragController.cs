@@ -12,9 +12,15 @@ namespace GunksAlert.Controllers;
 public class CragController : Controller {
     private readonly GunksDbContext _context;
     private readonly ILogger<CragController> _logger;
+    private readonly ForecastManager _forecastManager;
 
-    public CragController(GunksDbContext context, ILogger<CragController> logger) {
+    public CragController(
+        GunksDbContext context,
+        ForecastManager forecastManager,
+        ILogger<CragController> logger
+    ) {
         _context = context;
+        _forecastManager = forecastManager;
         _logger = logger;
     }
 
@@ -24,9 +30,9 @@ public class CragController : Controller {
     }
 
     [Route("/crag/forecast", Name = "Crag Forecast")]
-    public async Task<IActionResult> Forecast(ForecastManager forecastManager) {
+    public async Task<IActionResult> Forecast() {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
-        string forecast = await forecastManager.GetForecast(gunks);
+        string forecast = await _forecastManager.GetForecast(gunks);
         ViewData["forecast"] = forecast;
 
         return View();

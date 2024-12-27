@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using GunksAlert.Data;
+using GunksAlert.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<GunksDbContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("GunksAlert"))
 );
+
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<OpenWeatherBridge, OpenWeatherBridge>();
+builder.Services.AddScoped<ForecastManager, ForecastManager>();
 
 var app = builder.Build();
 

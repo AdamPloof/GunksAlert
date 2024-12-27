@@ -18,7 +18,7 @@ public class ForecastManager {
 
     public ForecastManager(OpenWeatherBridge openWeather)  {
         _openWeather = openWeather;
-        _forecastPath = "/";
+        _forecastPath = "/data/3.0/onecall";
     }
 
     /// <summary>

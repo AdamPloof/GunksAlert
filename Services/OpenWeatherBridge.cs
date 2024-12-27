@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Text;
+using System.IO;
 using System.Collections.Generic;
 using Microsoft.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
@@ -20,8 +21,10 @@ public class OpenWeatherBridge {
         _key = config.GetValue<string>("OpenWeatherKey") ?? throw new ArgumentException("API key not set");
         _openWeather = clientFactory.CreateClient("OpenWeather");
         _openWeather.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
-        _openWeather.DefaultRequestHeaders.Add(HeaderNames.UserAgent, "weather@gunksalert.com");
-        _openWeather.BaseAddress = new Uri("https://api.openweathermap.org/data/3.0/onecall");
+
+        // TODO: invalid value for UserAgent
+        // _openWeather.DefaultRequestHeaders.Add(HeaderNames.UserAgent, "weather@gunksalert.com");
+        _openWeather.BaseAddress = new Uri("https://api.openweathermap.org");
     }
 
     public async Task<string?> Get(string path, Dictionary<string, string> queryParams) {
@@ -35,7 +38,6 @@ public class OpenWeatherBridge {
         }
 
         Uri uri = new Uri(_openWeather.BaseAddress, path + query.ToString());
-
         try {
             using HttpResponseMessage res = await _openWeather.GetAsync(uri);
             res.EnsureSuccessStatusCode();
