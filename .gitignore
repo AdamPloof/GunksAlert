@@ -485,3 +485,4 @@ $RECYCLE.BIN/
 
 ## Project
 appsettings.Development.json
+var/sample_data/

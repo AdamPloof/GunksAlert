@@ -6,7 +6,10 @@ namespace GunksAlert.Models;
 /// <summary>
 /// Represents a standarized weather condition summary for a day including an icon code.
 /// </summary>
-/// 
+/// <remarks>
+/// NOTE: It is possible to meet more than one weather condition for a requested location.
+/// The first weather condition in API respond is primary.
+/// </remarks>
 /// <seealso href="https://openweathermap.org/weather-conditions" />
 public class DailyCondition {
     [Key]
