@@ -25,6 +25,7 @@ public class Forecast {
     private double _tempFeelsLikeDay;
 
     [Key]
+    [JsonPropertyName("id")]
     public int Id { get; private set; }
 
     [Required]
@@ -122,8 +123,9 @@ public class Forecast {
     [NonZero]
     public int DailyConditionId { get; set; }
 
+    // TODO: Set this on setting DailyConditionId
     [JsonIgnore]
-    public required DailyCondition DailyCondition { get; set; }
+    public DailyCondition? DailyCondition { get; set; }
 
     public class Temperature {
         [JsonPropertyName("min")]

@@ -1,7 +1,6 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using GunksAlert.Models;
 
 namespace GunksAlert.Services.Converters;
 
@@ -16,6 +15,12 @@ namespace GunksAlert.Services.Converters;
 /// array in `Read()`
 /// </remarks>
 public class DailyConditionIdConverter : JsonConverter<int> {
+    // private readonly IRepository<DailyCondition> _repo;
+
+    // public DailyConditionIdConverter(IRepository<DailyCondition> repo) {
+    //     _repo = repo;
+    // }
+
     public override int Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
@@ -38,7 +43,6 @@ public class DailyConditionIdConverter : JsonConverter<int> {
     }
 
     public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options) {
-        // TODO: return the DailyCondition for the ID
-        throw new NotImplementedException("Serialization not supported");
+        writer.WriteNumberValue(value);
     }
 }

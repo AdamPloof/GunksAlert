@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace GunksAlert.Models;
 
@@ -17,17 +18,21 @@ public class DailyCondition {
 
     [StringLength(200)]
     [Required]
+    [JsonPropertyName("main")]
     public required string Main { get; set; }
 
     [StringLength(200)]
     [Required]
+    [JsonPropertyName("description")]
     public required string Description { get; set; }
 
     [StringLength(3)]
     [Required]
+    [JsonPropertyName("iconDay")]
     public required string IconDay { get; set; }
 
     [StringLength(3)]
     [Required]
+    [JsonPropertyName("iconNight")]
     public required string IconNight { get; set; }
 }
