@@ -23,6 +23,7 @@ public class Forecast {
     private double _tempHigh;
     private FeelsLikeTemperature _tempFeelsLike = new FeelsLikeTemperature();
     private double _tempFeelsLikeDay;
+    private DailyCondition? _condition;
 
     [Key]
     [JsonPropertyName("id")]
@@ -89,21 +90,26 @@ public class Forecast {
     }
 
     [Required]
+    [JsonPropertyName("wind_speed")]
     public double WindSpeed { get; set; }
 
     [Required]
+    [JsonPropertyName("wind_gust")]
     public double WindGust { get; set; }
 
     [Required]
     [Range(0, 360)]
+    [JsonPropertyName("wind_deg")]
     public int WindDegree { get; set; }
 
     [Required]
     [Range(0, 100)]
+    [JsonPropertyName("clouds")]
     public int Clouds { get; set; }
 
     [Required]
     [Range(0, 100)]
+    [JsonPropertyName("humidity")]
     public int Humidity { get; set; }
 
     [Required]
@@ -118,14 +124,20 @@ public class Forecast {
     public double Snow { get; set ;}
 
     [ForeignKey("DailyCondition")]
-    [JsonPropertyName("weather")]
-    [JsonConverter(typeof(DailyConditionIdConverter))]
-    [NonZero]
-    public int DailyConditionId { get; set; }
-
-    // TODO: Set this on setting DailyConditionId
     [JsonIgnore]
-    public DailyCondition? DailyCondition { get; set; }
+    [NonZero]
+    public int DailyConditionId { get; private set; }
+
+    [JsonPropertyName("weather")]
+    [JsonConverter(typeof(DailyConditionConverter))]
+    [NotMapped]
+    public DailyCondition? DailyCondition {
+        get => _condition;
+        set {
+            _condition = value;
+            DailyConditionId = value == null ? 0 : value.Id;
+        }
+    }
 
     public class Temperature {
         [JsonPropertyName("min")]
@@ -137,6 +149,6 @@ public class Forecast {
 
     public class FeelsLikeTemperature {
         [JsonPropertyName("day")]
-        public double Day;
+        public double Day { get; set; }
     }
 }

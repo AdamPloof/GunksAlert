@@ -2,6 +2,8 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using GunksAlert.Models;
+
 namespace GunksAlert.Services.Converters;
 
 /// <summary>
@@ -14,14 +16,8 @@ namespace GunksAlert.Services.Converters;
 /// The first weather condition in API respond is primary. That's why we're deserializing an
 /// array in `Read()`
 /// </remarks>
-public class DailyConditionIdConverter : JsonConverter<int> {
-    // private readonly IRepository<DailyCondition> _repo;
-
-    // public DailyConditionIdConverter(IRepository<DailyCondition> repo) {
-    //     _repo = repo;
-    // }
-
-    public override int Read(
+public class DailyConditionConverter : JsonConverter<DailyCondition?> {
+    public override DailyCondition? Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options
@@ -33,16 +29,24 @@ public class DailyConditionIdConverter : JsonConverter<int> {
                     root.GetArrayLength() > 0 
                     && root[0].TryGetProperty("id", out JsonElement prop)
                 ) {
-                    return prop.GetInt32();
+                    return JsonSerializer.Deserialize<DailyCondition>(root[0]);
                 }
             }
         }
 
-        // ID not found!
-        return 0;
+        return null;
     }
 
-    public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options) {
-        writer.WriteNumberValue(value);
+    public override void Write(Utf8JsonWriter writer, DailyCondition? value, JsonSerializerOptions options) {
+        if (value == null) {
+            writer.WriteStartArray();
+            writer.WriteEndArray();
+
+            return;
+        }
+
+        writer.WriteStartArray();
+        JsonSerializer.Serialize(writer, value, options);
+        writer.WriteEndArray();
     }
 }
