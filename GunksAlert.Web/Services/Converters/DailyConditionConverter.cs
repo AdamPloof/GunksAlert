@@ -39,14 +39,9 @@ public class DailyConditionConverter : JsonConverter<DailyCondition?> {
 
     public override void Write(Utf8JsonWriter writer, DailyCondition? value, JsonSerializerOptions options) {
         if (value == null) {
-            writer.WriteStartArray();
-            writer.WriteEndArray();
-
             return;
         }
 
-        writer.WriteStartArray();
         JsonSerializer.Serialize(writer, value, options);
-        writer.WriteEndArray();
     }
 }
