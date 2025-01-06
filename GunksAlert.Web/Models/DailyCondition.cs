@@ -17,7 +17,6 @@ public class DailyCondition {
     private string _iconDay = "";
     private string _iconNight = "";
 
-    // TODO: setter should be private
     [Key]
     [JsonPropertyName("id")]
     public int Id { get; set; }

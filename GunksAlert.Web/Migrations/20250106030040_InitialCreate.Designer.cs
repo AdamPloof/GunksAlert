@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GunksAlert.Migrations
 {
     [DbContext(typeof(GunksDbContext))]
-    [Migration("20241225015727_InitialCreate")]
+    [Migration("20250106030040_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace GunksAlert.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("public")
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -50,7 +51,7 @@ namespace GunksAlert.Migrations
 
                     b.HasIndex("CragId");
 
-                    b.ToTable("AlertCriteria", (string)null);
+                    b.ToTable("AlertCriteria", "public");
                 });
 
             modelBuilder.Entity("GunksAlert.Models.AlertPeriod", b =>
@@ -69,7 +70,7 @@ namespace GunksAlert.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AlertPeriod", (string)null);
+                    b.ToTable("AlertPeriod", "public");
                 });
 
             modelBuilder.Entity("GunksAlert.Models.ClimbableConditions", b =>
@@ -120,7 +121,7 @@ namespace GunksAlert.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ClimbableConditions", (string)null);
+                    b.ToTable("ClimbableConditions", "public");
                 });
 
             modelBuilder.Entity("GunksAlert.Models.Crag", b =>
@@ -155,21 +156,23 @@ namespace GunksAlert.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Crag", (string)null);
+                    b.ToTable("Crag", "public");
                 });
 
             modelBuilder.Entity("GunksAlert.Models.DailyCondition", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasAnnotation("Relational:JsonPropertyName", "description");
 
                     b.Property<string>("IconDay")
                         .IsRequired()
@@ -184,70 +187,80 @@ namespace GunksAlert.Migrations
                     b.Property<string>("Main")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasAnnotation("Relational:JsonPropertyName", "main");
 
                     b.HasKey("Id");
 
-                    b.ToTable("DailyCondition", (string)null);
+                    b.ToTable("DailyCondition", "public");
                 });
 
             modelBuilder.Entity("GunksAlert.Models.Forecast", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Clouds")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Relational:JsonPropertyName", "clouds");
 
                     b.Property<int>("DailyConditionId")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("Date")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasAnnotation("Relational:JsonPropertyName", "dt");
 
                     b.Property<int>("Humidity")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Relational:JsonPropertyName", "humidity");
 
-                    b.Property<int>("Pop")
-                        .HasColumnType("integer");
+                    b.Property<double>("Pop")
+                        .HasColumnType("double precision")
+                        .HasAnnotation("Relational:JsonPropertyName", "pop");
 
                     b.Property<double>("Rain")
-                        .HasColumnType("double precision");
+                        .HasColumnType("double precision")
+                        .HasAnnotation("Relational:JsonPropertyName", "rain");
 
                     b.Property<double>("Snow")
-                        .HasColumnType("double precision");
+                        .HasColumnType("double precision")
+                        .HasAnnotation("Relational:JsonPropertyName", "snow");
 
                     b.Property<string>("Summary")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasAnnotation("Relational:JsonPropertyName", "summary");
 
-                    b.Property<int>("TempFeelsLike")
-                        .HasColumnType("integer");
+                    b.Property<double>("TempFeelsLikeDay")
+                        .HasColumnType("double precision");
 
-                    b.Property<int>("TempHigh")
-                        .HasColumnType("integer");
+                    b.Property<double>("TempHigh")
+                        .HasColumnType("double precision");
 
-                    b.Property<int>("TempLow")
-                        .HasColumnType("integer");
+                    b.Property<double>("TempLow")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("WindDegree")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Relational:JsonPropertyName", "wind_deg");
 
-                    b.Property<int>("WindGust")
-                        .HasColumnType("integer");
+                    b.Property<double>("WindGust")
+                        .HasColumnType("double precision")
+                        .HasAnnotation("Relational:JsonPropertyName", "wind_gust");
 
-                    b.Property<int>("WindSpeed")
-                        .HasColumnType("integer");
+                    b.Property<double>("WindSpeed")
+                        .HasColumnType("double precision")
+                        .HasAnnotation("Relational:JsonPropertyName", "wind_speed");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DailyConditionId");
-
-                    b.ToTable("Forecast", (string)null);
+                    b.ToTable("Forecast", "public");
                 });
 
             modelBuilder.Entity("GunksAlert.Models.WeatherHistory", b =>
@@ -261,35 +274,31 @@ namespace GunksAlert.Migrations
                     b.Property<int>("Clouds")
                         .HasColumnType("integer");
 
-                    b.Property<int>("DailyConditionId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset>("Date")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasAnnotation("Relational:JsonPropertyName", "date");
 
                     b.Property<int>("Humidity")
                         .HasColumnType("integer");
 
-                    b.Property<double>("Rain")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("Snow")
-                        .HasColumnType("double precision");
-
-                    b.Property<int>("Temp")
+                    b.Property<int>("Precipitation")
                         .HasColumnType("integer");
+
+                    b.Property<double>("TempHigh")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("TempLow")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("WindDegree")
                         .HasColumnType("integer");
 
-                    b.Property<int>("WindSpeed")
-                        .HasColumnType("integer");
+                    b.Property<double>("WindSpeed")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DailyConditionId");
-
-                    b.ToTable("WeatherHistory", (string)null);
+                    b.ToTable("WeatherHistory", "public");
                 });
 
             modelBuilder.Entity("GunksAlert.Models.AlertCriteria", b =>
@@ -317,28 +326,6 @@ namespace GunksAlert.Migrations
                     b.Navigation("ClimbableConditions");
 
                     b.Navigation("Crag");
-                });
-
-            modelBuilder.Entity("GunksAlert.Models.Forecast", b =>
-                {
-                    b.HasOne("GunksAlert.Models.DailyCondition", "DailyCondition")
-                        .WithMany()
-                        .HasForeignKey("DailyConditionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DailyCondition");
-                });
-
-            modelBuilder.Entity("GunksAlert.Models.WeatherHistory", b =>
-                {
-                    b.HasOne("GunksAlert.Models.DailyCondition", "DailyCondition")
-                        .WithMany()
-                        .HasForeignKey("DailyConditionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DailyCondition");
                 });
 #pragma warning restore 612, 618
         }
