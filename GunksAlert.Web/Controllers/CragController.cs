@@ -32,8 +32,11 @@ public class CragController : Controller {
     [Route("/crag/forecast", Name = "Crag Forecast")]
     public async Task<IActionResult> Forecast() {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
-        string forecast = await _forecastManager.GetForecast(gunks);
-        ViewData["forecast"] = forecast;
+        if (await _forecastManager.FetchForecasts(gunks) == 0) {
+            ViewData["forecast"] = "No forecasts saved";
+        } else {
+            ViewData["forecast"] = "Got em!";
+        }
 
         return View();
     }
