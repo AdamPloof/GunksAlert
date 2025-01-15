@@ -51,6 +51,7 @@ public class ForecastManager {
         }
 
         foreach (Forecast forecast in forecasts) {
+            forecast.CragId = crag.Id;
             _context.Forecasts.Add(forecast);
         }
 

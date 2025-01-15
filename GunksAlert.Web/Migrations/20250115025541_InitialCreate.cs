@@ -98,6 +98,7 @@ namespace GunksAlert.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CragId = table.Column<int>(type: "integer", nullable: false),
                     Date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Summary = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     TempLow = table.Column<double>(type: "double precision", nullable: false),
@@ -125,6 +126,7 @@ namespace GunksAlert.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CragId = table.Column<int>(type: "integer", nullable: false),
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
                     TempLow = table.Column<double>(type: "double precision", nullable: false),
                     TempHigh = table.Column<double>(type: "double precision", nullable: false),

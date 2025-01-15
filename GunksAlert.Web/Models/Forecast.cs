@@ -29,6 +29,11 @@ public class Forecast {
     [JsonPropertyName("id")]
     public int Id { get; private set; }
 
+    [ForeignKey("Crag")]
+    [JsonIgnore]
+    [NonZero]
+    public int CragId { get; set; }
+
     [Required]
     [JsonPropertyName("dt")]
     [JsonConverter(typeof(UnixTimestampConverter))]

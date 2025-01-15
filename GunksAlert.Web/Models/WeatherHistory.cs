@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 using GunksAlert.Services.Converters;
+using GunksAlert.Services.Attributes;
 
 namespace GunksAlert.Models;
 
@@ -30,6 +31,11 @@ public class WeatherHistory {
 
     [Key]
     public int Id { get; private set; }
+
+    [ForeignKey("Crag")]
+    [JsonIgnore]
+    [NonZero]
+    public int CragId { get; set; }
 
     [Required]
     [JsonPropertyName("date")]

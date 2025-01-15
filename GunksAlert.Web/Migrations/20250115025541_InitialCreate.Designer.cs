@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GunksAlert.Migrations
 {
     [DbContext(typeof(GunksDbContext))]
-    [Migration("20250106030040_InitialCreate")]
+    [Migration("20250115025541_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -208,6 +208,9 @@ namespace GunksAlert.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Relational:JsonPropertyName", "clouds");
 
+                    b.Property<int>("CragId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("DailyConditionId")
                         .HasColumnType("integer");
 
@@ -272,6 +275,9 @@ namespace GunksAlert.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Clouds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CragId")
                         .HasColumnType("integer");
 
                     b.Property<DateOnly>("Date")

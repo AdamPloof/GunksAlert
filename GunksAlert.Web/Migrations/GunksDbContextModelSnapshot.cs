@@ -205,6 +205,9 @@ namespace GunksAlert.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Relational:JsonPropertyName", "clouds");
 
+                    b.Property<int>("CragId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("DailyConditionId")
                         .HasColumnType("integer");
 
@@ -269,6 +272,9 @@ namespace GunksAlert.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Clouds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CragId")
                         .HasColumnType("integer");
 
                     b.Property<DateOnly>("Date")
