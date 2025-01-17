@@ -18,6 +18,7 @@ builder.Services.AddDbContext<GunksDbContext>(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<OpenWeatherBridge, OpenWeatherBridge>();
 builder.Services.AddScoped<ForecastManager, ForecastManager>();
+builder.Services.AddScoped<WeatherHistoryManager, WeatherHistoryManager>();
 
 var app = builder.Build();
 

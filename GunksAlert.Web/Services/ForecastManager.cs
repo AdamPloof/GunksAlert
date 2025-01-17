@@ -22,7 +22,7 @@ public class ForecastManager {
     private readonly GunksDbContext _context;
     private string _forecastPath;
 
-    public ForecastManager(OpenWeatherBridge openWeather, GunksDbContext context)  {
+    public ForecastManager(OpenWeatherBridge openWeather, GunksDbContext context) {
         _openWeather = openWeather;
         _context = context;
         _forecastPath = "/data/3.0/onecall";
