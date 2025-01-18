@@ -37,7 +37,7 @@ public class CragController : Controller {
     public async Task<IActionResult> FetchWeatherHistory(string date) {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
         DateOnly historyDate = string.IsNullOrEmpty(date)
-            ? DateOnly.FromDateTime(DateTime.Now)
+            ? DateOnly.FromDateTime(DateTime.Today.AddDays(-1))
             : DateOnly.ParseExact(date, "yyyy-MM-dd");
         if (await _weatherHistoryManager.FetchHistory(gunks, historyDate) == 0) {
             ViewData["history"] = "No history saved";
@@ -52,7 +52,7 @@ public class CragController : Controller {
     public async Task<IActionResult> ClearWeatherHistory(string through) {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
         DateOnly throughDate = string.IsNullOrEmpty(through)
-            ? DateOnly.FromDateTime(DateTime.Now)
+            ? DateOnly.FromDateTime(DateTime.Today)
             : DateOnly.ParseExact(through, "yyyy-MM-dd");
         if (await _weatherHistoryManager.ClearHistory(gunks, throughDate) == 0) {
             ViewData["history"] = "No history deleted";
@@ -72,7 +72,7 @@ public class CragController : Controller {
             ViewData["forecast"] = "Got em!";
         }
 
-        return View();
+        return View("Forecast");
     }
 
     [Route("/crag/forecast/clear", Name = "ForecastClear")]
@@ -84,6 +84,6 @@ public class CragController : Controller {
             ViewData["forecast"] = "Removed em!";
         }
 
-        return View();
+        return View("Forecast");
     }
 }

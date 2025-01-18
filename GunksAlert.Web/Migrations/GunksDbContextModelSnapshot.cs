@@ -271,8 +271,8 @@ namespace GunksAlert.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Clouds")
-                        .HasColumnType("integer");
+                    b.Property<double>("Clouds")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("CragId")
                         .HasColumnType("integer");
@@ -281,11 +281,11 @@ namespace GunksAlert.Migrations
                         .HasColumnType("date")
                         .HasAnnotation("Relational:JsonPropertyName", "date");
 
-                    b.Property<int>("Humidity")
-                        .HasColumnType("integer");
+                    b.Property<double>("Humidity")
+                        .HasColumnType("double precision");
 
-                    b.Property<int>("Precipitation")
-                        .HasColumnType("integer");
+                    b.Property<double>("Precipitation")
+                        .HasColumnType("double precision");
 
                     b.Property<double>("TempHigh")
                         .HasColumnType("double precision");
@@ -293,8 +293,8 @@ namespace GunksAlert.Migrations
                     b.Property<double>("TempLow")
                         .HasColumnType("double precision");
 
-                    b.Property<int>("WindDegree")
-                        .HasColumnType("integer");
+                    b.Property<double>("WindDegree")
+                        .HasColumnType("double precision");
 
                     b.Property<double>("WindSpeed")
                         .HasColumnType("double precision");

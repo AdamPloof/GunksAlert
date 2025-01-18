@@ -130,11 +130,11 @@ namespace GunksAlert.Migrations
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
                     TempLow = table.Column<double>(type: "double precision", nullable: false),
                     TempHigh = table.Column<double>(type: "double precision", nullable: false),
-                    Clouds = table.Column<int>(type: "integer", nullable: false),
-                    Humidity = table.Column<int>(type: "integer", nullable: false),
-                    Precipitation = table.Column<int>(type: "integer", nullable: false),
+                    Clouds = table.Column<double>(type: "double precision", nullable: false),
+                    Humidity = table.Column<double>(type: "double precision", nullable: false),
+                    Precipitation = table.Column<double>(type: "double precision", nullable: false),
                     WindSpeed = table.Column<double>(type: "double precision", nullable: false),
-                    WindDegree = table.Column<int>(type: "integer", nullable: false)
+                    WindDegree = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {

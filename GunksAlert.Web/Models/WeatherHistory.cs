@@ -8,6 +8,8 @@ using GunksAlert.Services.Attributes;
 
 namespace GunksAlert.Models;
 
+// TODO: clouds, precipitation, humidity, and wind degree should all be double
+
 /// <summary>
 /// Represents the weather for a single day in the past.
 /// </summary>
@@ -17,17 +19,17 @@ public class WeatherHistory {
     private double _tempHigh;
 
     private DailyCloudCover _dailyClouds = new DailyCloudCover();
-    private int _clouds;
+    private double _clouds;
 
     private DailyPrecipitation _dailyPrecipitation = new DailyPrecipitation();
-    private int _precipitation;
+    private double _precipitation;
 
     private DailyHumidity _dailyHumidity = new DailyHumidity();
-    private int _humidity;
+    private double _humidity;
 
     private MaxWind _maxWind = new MaxWind();
     private double _windSpeed;
-    private int _windDegree;
+    private double _windDegree;
 
     [Key]
     public int Id { get; private set; }
@@ -85,7 +87,7 @@ public class WeatherHistory {
 
     [Required]
     [JsonIgnore]
-    public int Clouds {
+    public double Clouds {
         get => _clouds;
         set {
             _clouds = value;
@@ -105,7 +107,7 @@ public class WeatherHistory {
 
     [Required]
     [JsonIgnore]
-    public int Humidity {
+    public double Humidity {
         get => _humidity;
         set {
             _humidity = value;
@@ -125,7 +127,7 @@ public class WeatherHistory {
 
     [Required]
     [JsonIgnore]
-    public int Precipitation {
+    public double Precipitation {
         get => _precipitation;
         set {
             _precipitation = value;
@@ -157,7 +159,7 @@ public class WeatherHistory {
 
     [Required]
     [JsonIgnore]
-    public int WindDegree {
+    public double WindDegree {
         get => _windDegree;
         set {
             _windDegree = value;
@@ -175,17 +177,17 @@ public class WeatherHistory {
 
     public class DailyHumidity {
         [JsonPropertyName("afternoon")]
-        public int Percent { get; set; }
+        public double Percent { get; set; }
     }
 
     public class DailyPrecipitation {
         [JsonPropertyName("total")]
-        public int Amount { get; set; }
+        public double Amount { get; set; }
     }
 
     public class DailyCloudCover {
         [JsonPropertyName("afternoon")]
-        public int Percent { get; set; }
+        public double Percent { get; set; }
     }
 
     public class MaxWind {
@@ -193,6 +195,6 @@ public class WeatherHistory {
         public double Speed { get; set; }
 
         [JsonPropertyName("direction")]
-        public int Direction { get; set; }
+        public double Direction { get; set; }
     }
 }

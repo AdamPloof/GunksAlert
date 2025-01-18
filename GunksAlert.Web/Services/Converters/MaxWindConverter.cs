@@ -20,7 +20,7 @@ public class MaxWindConverter : JsonConverter<WeatherHistory.MaxWind?> {
         using (JsonDocument doc = JsonDocument.ParseValue(ref reader)) {
             JsonElement max = doc.RootElement.GetProperty("max");
             double speed = max.GetProperty("speed").GetDouble();
-            int direction = max.GetProperty("direction").GetInt32();
+            double direction = max.GetProperty("direction").GetDouble();
             
             return new WeatherHistory.MaxWind() {
                 Speed = speed,
