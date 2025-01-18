@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -29,7 +30,7 @@ public class WeatherHistoryManager {
     /// </summary>
     /// <param name="crag"></param>
     /// <returns>The number of daily histories fetched</returns>
-    public async Task<int> FetchHistory(Crag crag, DateOnly date) {
+    public async Task<WeatherHistory?> FetchHistory(Crag crag, DateOnly date) {
         Dictionary<string, string> queryParams = new Dictionary<string, string>() {
             {"lat", crag.Latitude.ToString()},
             {"lon", crag.Longitude.ToString()},
@@ -41,14 +42,14 @@ public class WeatherHistoryManager {
         JsonNode root = JsonNode.Parse(res)!;
         WeatherHistory? history = JsonSerializer.Deserialize<WeatherHistory>(root);
         if (history == null) {
-            return 0;
+            return history;
         }
 
         history.CragId = crag.Id;
         _context.WeatherHistories.Add(history);
         _context.SaveChanges();
 
-        return 1;
+        return history;
     }
 
     /// <summary>
@@ -56,8 +57,18 @@ public class WeatherHistoryManager {
     /// </summary>
     /// <param name="crag"></param>
     /// <param name="through">The date before which history should be deleted</param>
-    /// <returns>The number of rows deleted</returns>
-    public async Task<int> ClearHistory(Crag crag, DateOnly through) {
-        return await _context.WeatherHistories.Where(h => h.Date < through).ExecuteDeleteAsync();
+    /// <returns>The Ids of the histories deleted</returns>
+    public async Task<List<int>> ClearHistory(Crag crag, DateOnly through) {
+        IQueryable<WeatherHistory> histories = _context.WeatherHistories.Where(
+            h => h.Date < through);
+        List<int> ids = histories.Select(h => h.Id).ToList();
+
+        int deleteCount = await histories.ExecuteDeleteAsync();
+        if (deleteCount == ids.Count) {
+            return ids;
+        } else {
+            // TODO: log more details about this error
+            throw new Exception("Not all histories were deleted successfully");
+        }
     }
 }

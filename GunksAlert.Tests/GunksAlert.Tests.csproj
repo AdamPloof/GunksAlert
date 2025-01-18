@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GunksAlert.Web\GunksAlert.csproj" />
+    <ProjectReference Include="..\GunksAlert.Api\GunksAlert.Api.csproj" />
   </ItemGroup>
 
 </Project>

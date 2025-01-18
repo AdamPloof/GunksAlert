@@ -33,7 +33,7 @@ public class ForecastManager {
     /// </summary>
     /// <param name="crag"></param>
     /// <returns>The number of daily forecasts fetched</returns>
-    public async Task<int> FetchForecasts(Crag crag) {
+    public async Task<Forecast[]?> FetchForecasts(Crag crag) {
         Dictionary<string, string> queryParams = new Dictionary<string, string>() {
             {"lat", crag.Latitude.ToString()},
             {"lon", crag.Longitude.ToString()},
@@ -47,7 +47,7 @@ public class ForecastManager {
         Forecast[]? forecasts = JsonSerializer.Deserialize<Forecast[]>(forecastsNode);
 
         if (forecasts == null) {
-            return 0;
+            return forecasts;
         }
 
         foreach (Forecast forecast in forecasts) {
@@ -57,14 +57,22 @@ public class ForecastManager {
 
         _context.SaveChanges();
 
-        return forecasts.Length;
+        return forecasts;
     }
 
     /// <summary>
     /// Delete all forecasts currently in the database
     /// </summary>
     /// <returns>The number of rows deleted</returns>
-    public async Task<int> ClearForecasts(Crag crag) {
-        return await _context.Forecasts.ExecuteDeleteAsync();
+    public async Task<List<int>> ClearForecasts(Crag crag) {
+        IQueryable<Forecast> forecasts = _context.Forecasts;
+        List<int> ids = forecasts.Select(f => f.Id).ToList();
+        int deleteCount = await _context.Forecasts.ExecuteDeleteAsync();
+
+        if (deleteCount != ids.Count) {
+            throw new Exception("Unable to delete all forecasts");
+        }
+
+        return ids;
     }
 }

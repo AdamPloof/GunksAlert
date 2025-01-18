@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GunksAlert.Web", "GunksAlert.Web\GunksAlert.csproj", "{3DB2E2C2-C859-45B2-B3F8-AB59FACD4185}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GunksAlert.Api", "GunksAlert.Api\GunksAlert.Api.csproj", "{3DB2E2C2-C859-45B2-B3F8-AB59FACD4185}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GunksAlert.Tests", "GunksAlert.Tests\GunksAlert.Tests.csproj", "{A441088A-C1FD-45CD-95FC-D1EAE06DB180}"
 EndProject
