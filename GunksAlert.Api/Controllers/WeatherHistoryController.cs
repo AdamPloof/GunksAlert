@@ -24,8 +24,8 @@ public class WeatherHistoryController : ControllerBase {
         _logger = logger;
     }
 
-    [HttpGet("fetch/{date?}", Name = "WeatherHistoryFetch")]
-    public async Task<IActionResult> FetchWeatherHistory(string date) {
+    [HttpGet("update/{date?}", Name = "UpdateWeatherHistory")]
+    public async Task<IActionResult> UpdateWeatherHistory(string date) {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
         DateOnly historyDate = string.IsNullOrEmpty(date)
             ? DateOnly.FromDateTime(DateTime.Today.AddDays(-1))
@@ -40,7 +40,7 @@ public class WeatherHistoryController : ControllerBase {
         }
     }
 
-    [HttpDelete("{through?}", Name = "WeatherHistoryClear")]
+    [HttpDelete("clear/{through?}", Name = "ClearWeatherHistory")]
     public async Task<IActionResult> ClearWeatherHistory(string through) {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
         DateOnly throughDate = string.IsNullOrEmpty(through)

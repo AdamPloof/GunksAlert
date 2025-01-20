@@ -33,7 +33,7 @@ public class ForecastManager {
     /// </summary>
     /// <param name="crag"></param>
     /// <returns>The number of daily forecasts fetched</returns>
-    public async Task<Forecast[]?> FetchForecasts(Crag crag) {
+    public async Task<Forecast[]?> UpdateForecasts(Crag crag) {
         Dictionary<string, string> queryParams = new Dictionary<string, string>() {
             {"lat", crag.Latitude.ToString()},
             {"lon", crag.Longitude.ToString()},

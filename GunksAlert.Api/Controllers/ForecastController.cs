@@ -24,10 +24,10 @@ public class ForecastController : ControllerBase {
         _logger = logger;
     }
 
-    [Route("fetch", Name = "ForecastFetch")]
-    public async Task<IActionResult> FetchForecasts() {
+    [HttpGet("update", Name = "UpdateForecast")]
+    public async Task<IActionResult> UpdateForecasts() {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
-        Forecast[]? forecasts = await _forecastManager.FetchForecasts(gunks);
+        Forecast[]? forecasts = await _forecastManager.UpdateForecasts(gunks);
         if (forecasts == null) {
             return Problem("Unable to fetch forecasts for upcoming dates");
         } else {
@@ -35,7 +35,7 @@ public class ForecastController : ControllerBase {
         }
     }
 
-    [Route("clear", Name = "ForecastClear")]
+    [HttpDelete("clear", Name = "ForecastClear")]
     public async Task<IActionResult> ClearForecasts() {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
         try {
