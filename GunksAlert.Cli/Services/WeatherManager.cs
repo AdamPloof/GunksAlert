@@ -16,8 +16,14 @@ public class WeatherManager {
         _api = api;
     }
 
-    public async void UpdateWeatherHistory() {
-        string endpoint = "api/weather-history/update";
+    public async void UpdateWeatherHistory(DateTime? date = null) {
+        string endpoint;
+        if (date == null) {
+            endpoint = "api/weather-history/update";
+        } else {
+            endpoint = "api/weather-history/update/" + date?.ToString("yyyy-MM-dd");
+        }
+
         IApiResponse response = await _api.CallApi(HttpMethod.Get, endpoint);
         LogResponse(response);
     }
@@ -28,8 +34,14 @@ public class WeatherManager {
         LogResponse(response);
     }
 
-    public async void ClearWeatherHistory() {
-        string endpoint = "api/weather-history/clear";
+    public async void ClearWeatherHistory(DateTime? through = null) {
+        string endpoint;
+        if (through == null) {
+            endpoint = "api/weather-history/clear";
+        } else {
+            endpoint = "api/weather-history/clear/" + through?.ToString("yyyy-MM-dd");
+        }
+
         IApiResponse response = await _api.CallApi(HttpMethod.Delete, endpoint);
         LogResponse(response);
     }
