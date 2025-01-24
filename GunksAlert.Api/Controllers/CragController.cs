@@ -2,10 +2,10 @@ using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using GunksAlert.Data;
-using GunksAlert.Services;
+using GunksAlert.Api.Data;
+using GunksAlert.Api.Services;
 
-namespace GunksAlert.Controllers;
+namespace GunksAlert.Api.Controllers;
 
 public class CragController : Controller {
     private readonly GunksDbContext _context;

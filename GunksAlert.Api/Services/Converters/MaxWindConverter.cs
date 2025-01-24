@@ -1,10 +1,9 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using GunksAlert.Api.Models;
 
-using GunksAlert.Models;
-
-namespace GunksAlert.Services.Converters;
+namespace GunksAlert.Api.Services.Converters;
 
 /// <summary>
 /// In weather history data (aggregate weather) wind information is stored in 

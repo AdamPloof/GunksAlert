@@ -6,9 +6,11 @@ namespace GunksAlert.Cli;
 
 internal static class Program {
     static void Main(string[] args) {
-        ApiBridge api = new ApiBridge();
-        WeatherManager weatherManager = new WeatherManager(api);
-        App app = new App(weatherManager);
-        app.Run(args);
+        MainAsync(args).Wait();
+    }
+
+    static async Task MainAsync(string[] args) {
+        App app = new App();
+        await app.Run(args);
     }
 }

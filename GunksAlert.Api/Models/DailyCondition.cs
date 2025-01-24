@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace GunksAlert.Models;
+namespace GunksAlert.Api.Models;
 
 /// <summary>
 /// Represents a standarized weather condition summary for a day including an icon code.

@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Xunit;
 
-using GunksAlert.Models;
+using GunksAlert.Api.Models;
 
 namespace GunksAlert.Tests.Models;
 

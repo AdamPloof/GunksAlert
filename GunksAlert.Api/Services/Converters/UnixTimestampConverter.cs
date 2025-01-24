@@ -2,7 +2,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace GunksAlert.Services.Converters;
+namespace GunksAlert.Api.Services.Converters;
 
 public class UnixTimestampConverter : JsonConverter<DateTimeOffset> {
     public override DateTimeOffset Read(

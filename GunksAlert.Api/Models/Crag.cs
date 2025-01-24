@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GunksAlert.Models;
+namespace GunksAlert.Api.Models;
 
 /// <summary>
 /// The location of the crag to send alerts about. Hold the data needed to fetch 

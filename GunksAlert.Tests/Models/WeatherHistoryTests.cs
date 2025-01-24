@@ -2,9 +2,9 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Xunit;
-
-using GunksAlert.Models;
 using NuGet.ContentModel;
+
+using GunksAlert.Api.Models;
 
 namespace GunksAlert.Tests.Models;
 

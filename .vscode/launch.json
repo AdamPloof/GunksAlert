@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "coreclr",
+            "request": "launch",
+            "name": "Debug CLI app with args",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/GunksAlert.Cli/bin/Debug/net8.0/GunksAlert.Cli.dll",
+            "args": [
+                "--update=forecast"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        }
+    ],
+}

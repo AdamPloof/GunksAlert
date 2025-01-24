@@ -1,11 +1,13 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
-using GunksAlert.Models;
-using GunksAlert.Data;
-using GunksAlert.Services;
+using GunksAlert.Api.Models;
+using GunksAlert.Api.Data;
+using GunksAlert.Api.Services;
+using GunksAlert.Api.Http;
 
-namespace GunksAlert.Controllers;
+namespace GunksAlert.Api.Controllers;
 
 [ApiController]
 [Route("api/forecast")]
@@ -30,9 +32,17 @@ public class ForecastController : ControllerBase {
         Forecast[]? forecasts = await _forecastManager.UpdateForecasts(gunks);
         if (forecasts == null) {
             return Problem("Unable to fetch forecasts for upcoming dates");
-        } else {
-            return Ok(forecasts);
         }
+
+        int[] ids = forecasts.Select(f => f.Id).ToArray();
+        ApiResponseContent content = new ApiResponseContent() {
+            Status = ApiResponseContent.ResponseStatus.Success,
+            Action = "Update",
+            Model = typeof(Forecast).Name,
+            Data = ids
+        };        
+        
+        return Ok(content);
     }
 
     [HttpDelete("clear", Name = "ForecastClear")]
@@ -40,7 +50,14 @@ public class ForecastController : ControllerBase {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
         try {
             List<int> deletedIds = await _forecastManager.ClearForecasts(gunks);
-            return Ok(deletedIds);
+            ApiResponseContent content = new ApiResponseContent() {
+                Status = ApiResponseContent.ResponseStatus.Success,
+                Action = "Clear",
+                Model = typeof(Forecast).Name,
+                Data = deletedIds.ToArray()
+            };
+
+            return Ok(content);
         } catch (Exception e) {
             return Problem(e.Message, null, 500);
         }

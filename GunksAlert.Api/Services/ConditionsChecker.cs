@@ -1,4 +1,4 @@
-namespace GunksAlert.Services;
+namespace GunksAlert.Api.Services;
 
 /// <summary>
 /// ConditionsChecker is responsible for inspecting the recent weather history of a crag and the

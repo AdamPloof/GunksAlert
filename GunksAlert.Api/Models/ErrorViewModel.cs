@@ -1,4 +1,4 @@
-namespace GunksAlert.Models;
+namespace GunksAlert.Api.Models;
 
 public class ErrorViewModel
 {

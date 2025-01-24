@@ -1,9 +1,10 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
 
 using GunksAlert.Cli.Services;
-using System.Globalization;
 
 namespace GunksAlert.Cli;
 
@@ -11,23 +12,21 @@ namespace GunksAlert.Cli;
 /// TODO: add remark about why actions return bools (should continue?)
 /// </summary>
 public class App {
-    private WeatherManager _weatherManager;
-    private Dictionary<string, Func<string?, bool>> _actions;
+    private Dictionary<string, Func<string?, Task<bool>>> _actions;
     private DateTime? _dateOpt;
     private bool _abortEarly;
 
-    public App(WeatherManager weatherManager) {
-        _weatherManager = weatherManager;
+    public App() {
         _dateOpt = null;
         _abortEarly = false;
 
         // Note: order of options is important. Earlier options are given precedence
         // and may short circuit later options.
-        _actions = new Dictionary<string, Func<string?, bool>>() {
-            {"-h", Help},
-            {"--help", Help},
-            {"-d", StoreDateOpt},
-            {"--date", StoreDateOpt},
+        _actions = new Dictionary<string, Func<string?, Task<bool>>>() {
+            {"-h", _ => Task.FromResult(Help(_))},
+            {"--help", _ => Task.FromResult(Help(_))},
+            {"-d", dateStr => Task.FromResult(StoreDateOpt(dateStr))},
+            {"--date", dateStr => Task.FromResult(StoreDateOpt(dateStr))},
             {"-u", HandleUpdate},
             {"--update", HandleUpdate},
             {"-c", HandleClear},
@@ -35,7 +34,7 @@ public class App {
         };
     }
 
-    public void Run(string[] args) {
+    public async Task Run(string[] args) {
         if (args.Length == 0) {
             Console.WriteLine("No arguments provided. Aborting.");
             return;
@@ -52,12 +51,12 @@ public class App {
             string key = keyVal[0];
             string? val = keyVal.Length > 1 ? keyVal[1] : null;
 
-            if (!_actions.TryGetValue(key, out Func<string?, bool>? action)) {
+            if (!_actions.TryGetValue(key, out Func<string?, Task<bool>>? action)) {
                 Console.WriteLine($"Invalid argument: {key}");
                 return;
             }
 
-            bool shouldContinue = action.Invoke(val);
+            bool shouldContinue = await action.Invoke(val);
             if (!shouldContinue) {
                 return;
             }
@@ -86,23 +85,23 @@ public class App {
         return true;
     }
 
-    private bool HandleUpdate(string? model) {
-        if (model == null) {
+    private async Task<bool> HandleUpdate(string? model) {
+            if (model == null) {
             Console.WriteLine("Most provide a model to update. Null given");
             return false;
         }
 
         string normalizedModel = model.ToLower().Replace("_", string.Empty);
         if (normalizedModel == "weatherhistory") {
-            _weatherManager.UpdateWeatherHistory(_dateOpt);
+            await WeatherManager.UpdateWeatherHistory(_dateOpt);
         } else if (normalizedModel == "forecast") {
-            _weatherManager.UpdateForecast();
+            await WeatherManager.UpdateForecast();
         }
 
         return false;
     }
 
-    private bool HandleClear(string? model) {
+    private async Task<bool> HandleClear(string? model) {
         if (model == null) {
             Console.WriteLine("Most provide a model to clear. Null given");
             return false;
@@ -110,9 +109,9 @@ public class App {
 
         string normalizedModel = model.ToLower();
         if (normalizedModel == "weather-history") {
-            _weatherManager.ClearWeatherHistory(_dateOpt);
+            await WeatherManager.ClearWeatherHistory(_dateOpt);
         } else if (normalizedModel == "forecast") {
-            _weatherManager.ClearForecasts();
+            await WeatherManager.ClearForecasts();
         }
 
         return false;

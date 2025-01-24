@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using GunksAlert.Models;
+using GunksAlert.Api.Models;
 
-namespace GunksAlert.Data;
+namespace GunksAlert.Api.Data;
 
 public class GunksDbContext : DbContext {
     public GunksDbContext(

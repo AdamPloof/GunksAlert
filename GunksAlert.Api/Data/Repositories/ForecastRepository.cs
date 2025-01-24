@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 
-using GunksAlert.Models;
-using GunksAlert.Data;
+using GunksAlert.Api.Models;
+using GunksAlert.Api.Data;
 
-namespace GunksAlert.Data.Repositories;
+namespace GunksAlert.Api.Data.Repositories;
 
 public class ForecastRepository : IRepository<Forecast> {
     private GunksDbContext _context;

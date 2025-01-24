@@ -3,10 +3,11 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 
-using GunksAlert.Models;
-using GunksAlert.Data;
+using GunksAlert.Api.Models;
+using GunksAlert.Api.Data;
+using GunksAlert.Api.Http;
 
-namespace GunksAlert.Services;
+namespace GunksAlert.Api.Services;
 
 /// <summary>
 /// ForecastManager is responsible for fetching forecast data, creating new

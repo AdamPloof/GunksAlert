@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-using GunksAlert.Models;
+using GunksAlert.Api.Models;
 
-namespace GunksAlert.Data;
+namespace GunksAlert.Api.Data;
 
 /// <summary>
 /// Seed the database with the default DailyCondition entities

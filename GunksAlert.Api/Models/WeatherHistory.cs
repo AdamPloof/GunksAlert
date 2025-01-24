@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-using GunksAlert.Services.Converters;
-using GunksAlert.Services.Attributes;
+using GunksAlert.Api.Services.Converters;
+using GunksAlert.Api.Services.Attributes;
 
-namespace GunksAlert.Models;
+namespace GunksAlert.Api.Models;
 
 // TODO: clouds, precipitation, humidity, and wind degree should all be double
 

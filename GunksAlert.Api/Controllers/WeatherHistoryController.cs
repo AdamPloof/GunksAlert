@@ -1,11 +1,12 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 
-using GunksAlert.Models;
-using GunksAlert.Data;
-using GunksAlert.Services;
+using GunksAlert.Api.Models;
+using GunksAlert.Api.Data;
+using GunksAlert.Api.Services;
+using GunksAlert.Api.Http;
 
-namespace GunksAlert.Controllers;
+namespace GunksAlert.Api.Controllers;
 
 [ApiController]
 [Route("api/weather-history")]
@@ -35,9 +36,16 @@ public class WeatherHistoryController : ControllerBase {
         if (history == null) {
             string dateStr = historyDate.ToString("yyyy-mm-dd");
             return Problem($"Unable to fetch history for date: {dateStr}", null, 500);
-        } else {
-            return Ok(history);
         }
+
+        ApiResponseContent content = new ApiResponseContent() {
+            Status = ApiResponseContent.ResponseStatus.Success,
+            Action = "Update",
+            Model = typeof(WeatherHistory).Name,
+            Data = [history.Id]
+        };
+
+        return Ok(content);
     }
 
     [HttpDelete("clear/{through?}", Name = "ClearWeatherHistory")]
@@ -49,8 +57,14 @@ public class WeatherHistoryController : ControllerBase {
 
         try {
             List<int> deletedIds = await _weatherHistoryManager.ClearHistory(gunks, throughDate);
+            ApiResponseContent content = new ApiResponseContent() {
+                Status = ApiResponseContent.ResponseStatus.Success,
+                Action = "Clear",
+                Model = typeof(WeatherHistory).Name,
+                Data = deletedIds.ToArray()
+            };
 
-            return Ok(deletedIds);
+            return Ok(content);
         } catch (Exception e) {
             return Problem(e.Message, null, 500);
         }

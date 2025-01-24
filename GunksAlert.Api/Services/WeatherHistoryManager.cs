@@ -5,10 +5,10 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 
-using GunksAlert.Models;
-using GunksAlert.Data;
+using GunksAlert.Api.Models;
+using GunksAlert.Api.Data;
 
-namespace GunksAlert.Services;
+namespace GunksAlert.Api.Services;
 
 /// <summary>
 /// WeatherHistoryManager is responsible for fetching weather history data, constructing

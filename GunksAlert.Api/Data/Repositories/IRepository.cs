@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GunksAlert.Data.Repositories;
+namespace GunksAlert.Api.Data.Repositories;
 
 /// <summary>
 /// Implementations of IRepository are responsible for fetching entities

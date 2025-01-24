@@ -2,9 +2,9 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using GunksAlert.Models;
+using GunksAlert.Api.Models;
 
-namespace GunksAlert.Services.Converters;
+namespace GunksAlert.Api.Services.Converters;
 
 /// <summary>
 /// Deserialize the `weather` property from a weather forecast/history response and 

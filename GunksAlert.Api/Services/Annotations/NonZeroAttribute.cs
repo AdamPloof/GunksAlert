@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GunksAlert.Services.Attributes;
+namespace GunksAlert.Api.Services.Attributes;
 
 public class NonZeroAttribute : ValidationAttribute {
     protected override ValidationResult? IsValid(

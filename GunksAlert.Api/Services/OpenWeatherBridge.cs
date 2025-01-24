@@ -7,7 +7,7 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 using NuGet.Protocol;
 
-namespace GunksAlert.Services;
+namespace GunksAlert.Api.Services;
 
 /// <summary>
 /// OpenWeatherBridge handles sending and parsing API requests to OpenWeatherMap's API

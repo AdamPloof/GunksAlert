@@ -2,9 +2,9 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Encodings.Web;
 
-using GunksAlert.Models;
+using GunksAlert.Api.Models;
 
-namespace GunksAlert.Controllers;
+namespace GunksAlert.Api.Controllers;
 
 public class HomeController : Controller {
     private readonly ILogger<HomeController> _logger;

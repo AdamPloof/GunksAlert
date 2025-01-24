@@ -1,4 +1,4 @@
-namespace GunksAlert.Services;
+namespace GunksAlert.Api.Services;
 
 /// <summary>
 /// AlertSender is responsible for sending alerts via the provided INotifier.

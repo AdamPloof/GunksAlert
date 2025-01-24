@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GunksAlert.Models;
+namespace GunksAlert.Api.Models;
 
 /// <summary>
 /// Represents the criteria for sending an alert.

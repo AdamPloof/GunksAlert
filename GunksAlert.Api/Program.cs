@@ -2,8 +2,8 @@ using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using GunksAlert.Data;
-using GunksAlert.Services;
+using GunksAlert.Api.Data;
+using GunksAlert.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

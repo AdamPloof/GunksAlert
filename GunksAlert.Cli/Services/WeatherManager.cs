@@ -9,14 +9,8 @@ namespace GunksAlert.Cli.Services;
 /// WeatherManager is responsible for calling the API endpoints used in keeping
 /// Forecast and WeatherHistory entities up to date.
 /// </summary>
-public class WeatherManager {
-    private ApiBridge _api;
-
-    public WeatherManager(ApiBridge api) {
-        _api = api;
-    }
-
-    public async void UpdateWeatherHistory(DateTime? date = null) {
+public static class WeatherManager {
+    public static async Task UpdateWeatherHistory(DateTime? date = null) {
         string endpoint;
         if (date == null) {
             endpoint = "api/weather-history/update";
@@ -24,17 +18,17 @@ public class WeatherManager {
             endpoint = "api/weather-history/update/" + date?.ToString("yyyy-MM-dd");
         }
 
-        IApiResponse response = await _api.CallApi(HttpMethod.Get, endpoint);
+        IApiResponse response = await ApiBridge.CallApi(HttpMethod.Get, endpoint);
         LogResponse(response);
     }
 
-    public async void UpdateForecast() {
+    public static async Task UpdateForecast() {
         string endpoint = "api/forecast/update";
-        IApiResponse response = await _api.CallApi(HttpMethod.Get, endpoint);
+        IApiResponse response = await ApiBridge.CallApi(HttpMethod.Get, endpoint);
         LogResponse(response);
     }
 
-    public async void ClearWeatherHistory(DateTime? through = null) {
+    public static async Task ClearWeatherHistory(DateTime? through = null) {
         string endpoint;
         if (through == null) {
             endpoint = "api/weather-history/clear";
@@ -42,17 +36,17 @@ public class WeatherManager {
             endpoint = "api/weather-history/clear/" + through?.ToString("yyyy-MM-dd");
         }
 
-        IApiResponse response = await _api.CallApi(HttpMethod.Delete, endpoint);
+        IApiResponse response = await ApiBridge.CallApi(HttpMethod.Delete, endpoint);
         LogResponse(response);
     }
 
-    public async void ClearForecasts() {
+    public static async Task ClearForecasts() {
         string endpoint = "api/forecast/clear";
-        IApiResponse response = await _api.CallApi(HttpMethod.Delete, endpoint);
+        IApiResponse response = await ApiBridge.CallApi(HttpMethod.Delete, endpoint);
         LogResponse(response);
     }
 
-    private void LogResponse(IApiResponse response) {
+    private static void LogResponse(IApiResponse response) {
         string uri = response.GetRequestUri().ToString();
         string resMsg = response.GetMessage();
         StringBuilder msg = new StringBuilder($"Request: {uri}");

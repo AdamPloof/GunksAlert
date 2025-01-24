@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-using GunksAlert.Services.Converters;
-using GunksAlert.Services.Attributes;
+using GunksAlert.Api.Services.Converters;
+using GunksAlert.Api.Services.Attributes;
 
-namespace GunksAlert.Models;
+namespace GunksAlert.Api.Models;
 
 /// <summary>
 /// Stores data for a single day's weather forecast. Is used by comparing to `ClimbableConditions`
