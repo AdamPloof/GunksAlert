@@ -5,32 +5,81 @@ using System.Globalization;
 using System.Threading.Tasks;
 
 using GunksAlert.Cli.Services;
+using GunksAlert.Cli.Entities;
 
 namespace GunksAlert.Cli;
 
 /// <summary>
-/// TODO: add remark about why actions return bools (should continue?)
+/// The main app class. Parses arguments and calls the actions. The _actions list maps command line
+/// args to methods.
 /// </summary>
+/// <remarks>
+/// All actions return a bool to indicate whether the app should continue executing other actions
+/// once complete with that one. 
+/// </remarks>
 public class App {
-    private Dictionary<string, Func<string?, Task<bool>>> _actions;
+    public record CliOption {
+        public required string Name { get; init; }
+        public string? Value { get; init; }
+    }
+
+    private List<AppAction> _options;
     private DateTime? _dateOpt;
+    private DateTime? _startDate;
+    private DateTime? _endDate;
     private bool _abortEarly;
 
     public App() {
         _dateOpt = null;
+        _startDate = null;
+        _endDate = null;
         _abortEarly = false;
 
         // Note: order of options is important. Earlier options are given precedence
         // and may short circuit later options.
-        _actions = new Dictionary<string, Func<string?, Task<bool>>>() {
-            {"-h", _ => Task.FromResult(Help(_))},
-            {"--help", _ => Task.FromResult(Help(_))},
-            {"-d", dateStr => Task.FromResult(StoreDateOpt(dateStr))},
-            {"--date", dateStr => Task.FromResult(StoreDateOpt(dateStr))},
-            {"-u", HandleUpdate},
-            {"--update", HandleUpdate},
-            {"-c", HandleClear},
-            {"--clear", HandleClear},
+        _options = new List<AppAction>() {
+            new AppAction() {
+                ShortOpt = "-h",
+                LongOpt ="--help",
+                ValueRequired = false,
+                ShouldContinue = false,
+                ActionFunc = _ => { Help(_); return Task.CompletedTask; } 
+            },
+            new AppAction() {
+                ShortOpt = "-d",
+                LongOpt ="--date",
+                ValueRequired = true,
+                ShouldContinue = true,
+                ActionFunc = date => { StoreDateOpt(date); return Task.CompletedTask; }
+            },
+            new AppAction() {
+                ShortOpt = "-s",
+                LongOpt ="--start_date",
+                ValueRequired = true,
+                ShouldContinue = true,
+                ActionFunc = startDate => { StoreStartDate(startDate); return Task.CompletedTask; }
+            },
+            new AppAction() {
+                ShortOpt = "-e",
+                LongOpt ="--end_date",
+                ValueRequired = true,
+                ShouldContinue = true,
+                ActionFunc = endDate => { StoreEndDate(endDate); return Task.CompletedTask; }
+            },
+            new AppAction() {
+                ShortOpt = "-u",
+                LongOpt ="--update",
+                ValueRequired = true,
+                ShouldContinue = false,
+                ActionFunc = HandleUpdate
+            },
+            new AppAction() {
+                ShortOpt = "-c",
+                LongOpt ="--clear",
+                ValueRequired = true,
+                ShouldContinue = false,
+                ActionFunc = HandleClear
+            },
         };
     }
 
@@ -40,84 +89,206 @@ public class App {
             return;
         }
 
-        // TODO: handle options and values separated by spaces as well as '='
-        foreach (string arg in args) {
+        Queue<AppAction> actionsToRun = GetActionQueue(args);
+        foreach (AppAction action in actionsToRun) {
             if (_abortEarly) {
                 Console.WriteLine("Exiting early. Check arguments and try again.");
                 return;
             }
 
-            string[] keyVal = arg.Split("=", 2);
-            string key = keyVal[0];
-            string? val = keyVal.Length > 1 ? keyVal[1] : null;
-
-            if (!_actions.TryGetValue(key, out Func<string?, Task<bool>>? action)) {
-                Console.WriteLine($"Invalid argument: {key}");
-                return;
-            }
-
-            bool shouldContinue = await action.Invoke(val);
-            if (!shouldContinue) {
+            await action.ActionFunc.Invoke(action.Value);
+            if (!action.ShouldContinue) {
                 return;
             }
         }
     }
 
-    private bool StoreDateOpt(string? date) {
+    /// <summary>
+    /// Parses command line args and returns the actions to be called in the appropriate order.
+    /// 
+    /// TODO: this should also check for invalid args
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns>The actions to be invoked</returns>
+    public Queue<AppAction> GetActionQueue(string[] args) {
+        Queue<AppAction> actionQueue = new Queue<AppAction>();
+        List<CliOption> opts = ParseOptions(args);
+        foreach (AppAction action in _options) {
+            // Note: ValidateOptions checks for dups so this should only ever return one option
+            CliOption? opt = opts.Where(
+                o => o.Name == action.ShortOpt || o.Name == action.LongOpt
+            ).FirstOrDefault();
+            if (opt != null) {
+                actionQueue.Enqueue(action);
+            }
+        }
+
+        return actionQueue;
+    }
+
+    private List<CliOption> ParseOptions(string[] args) {
+        List<CliOption> options = new();
+        bool skipNext = false;
+        int argIdx = 0;
+        foreach (string arg in args) {
+            if (skipNext) {
+                skipNext = false;
+                argIdx++;
+                continue;
+            }
+
+            string key;
+            string? val = null;
+            if (arg.Contains('=')) {
+                // "=" delimited
+                string[] keyVal = arg.Split("=", 2);
+                key = keyVal[0];
+                val = keyVal[1];
+            } else {
+                key = arg;
+            }
+
+            if ((val == null) && (argIdx < args.Length - 1)) {
+                // Check if the next arg is the value (space delimited)
+                string nextArg = args[argIdx + 1];
+                if (!nextArg.StartsWith('-')) {
+                    val = nextArg;
+                    skipNext = true;
+                }
+            }
+            
+            options.Add(new CliOption() {Name = key, Value = val});
+            argIdx++;
+        }
+
+        return options;
+    }
+
+    /// <summary>
+    /// Ensure that all options passed actually exist. Check that options with
+    /// required values have values set.
+    /// 
+    /// Throws ArgumentException if not valid
+    /// </summary>
+    /// <param name="options"></param>
+    private void ValidateOptions(List<CliOption> options) {
+
+    }
+
+    private static DateTime ParseDateOpt(string opt) {
+        if (!DateTime.TryParseExact(
+            opt,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out DateTime date
+        )) {
+            throw new ArgumentException($"Date option must be in yyyy-MM-dd format. Got: {opt}");
+        }
+
+        return date;
+    }
+
+    private void StoreDateOpt(string? date) {
         if (date == null) {
             _dateOpt = null;
         } else {
-            DateTime dateVal;
-            if (DateTime.TryParseExact(
-                date,
-                "yyyy-MM-dd",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out dateVal
-            )) {
-                _dateOpt = dateVal;
-            } else {
+            try {
+                _dateOpt = ParseDateOpt(date);
+            } catch (ArgumentException e) {
                 _abortEarly = true;
-                Console.WriteLine($"Date option must be in yyyy-MM-dd format. Got: {date}");
+                Console.WriteLine(e.Message);
             }
         }
-
-        return true;
     }
 
-    private async Task<bool> HandleUpdate(string? model) {
-            if (model == null) {
+    private void StoreStartDate(string? date) {
+        if (date == null) {
+            _startDate = null;
+        } else {
+            try {
+                _startDate = ParseDateOpt(date);
+            } catch (ArgumentException e) {
+                _abortEarly = true;
+                Console.WriteLine(e.Message);
+            }
+        }
+    }
+
+    private void StoreEndDate(string? date) {
+        if (date == null) {
+            _endDate = null;
+        } else {
+            try {
+                _endDate = ParseDateOpt(date);
+            } catch (ArgumentException e) {
+                _abortEarly = true;
+                Console.WriteLine(e.Message);
+            }
+        }
+    }
+
+    private async Task HandleUpdate(string? model) {
+        if (model == null) {
             Console.WriteLine("Most provide a model to update. Null given");
-            return false;
+            return;
         }
 
+        bool isSuccess = false;
         string normalizedModel = model.ToLower().Replace("_", string.Empty);
         if (normalizedModel == "weatherhistory") {
-            await WeatherManager.UpdateWeatherHistory(_dateOpt);
+            if (_startDate != null && _endDate != null ){
+                DateTime start = (DateTime)_startDate;
+                DateTime end = (DateTime)_endDate;
+                string startStr = start.ToString("yyyy-MM-dd");
+                string endStr = end.ToString("yyyy-MM-dd");
+                Console.WriteLine($"Updating WeatherHistroy for range. Start date: {startStr}, End date: {endStr}...");
+
+                isSuccess = await WeatherManager.UpdateWeatherHistory(start, end);
+            } else {
+                string dateStr = _dateOpt == null ? "yesterday" : _dateOpt?.ToString("yyyy-MM-dd")!;
+                Console.WriteLine($"Updating weather history for date: {dateStr}...");
+
+                isSuccess = await WeatherManager.UpdateWeatherHistory(_dateOpt);
+            }
         } else if (normalizedModel == "forecast") {
-            await WeatherManager.UpdateForecast();
+            Console.WriteLine("Updating forecast...");
+            isSuccess = await WeatherManager.UpdateForecast();
         }
 
-        return false;
+         if (isSuccess) {
+            Console.WriteLine("Update successful");
+         } else {
+            Console.WriteLine("Update failed. See logs for details");
+         }
     }
 
-    private async Task<bool> HandleClear(string? model) {
+    private async Task HandleClear(string? model) {
         if (model == null) {
             Console.WriteLine("Most provide a model to clear. Null given");
-            return false;
+            return;
         }
 
+        bool isSuccess = false;
         string normalizedModel = model.ToLower();
         if (normalizedModel == "weather-history") {
-            await WeatherManager.ClearWeatherHistory(_dateOpt);
+            string dateStr = _dateOpt == null ? "today" : _dateOpt?.ToString("yyyy-MM-dd")!;
+            Console.WriteLine($"Clearing weather history through date: {dateStr}...");
+
+            isSuccess = await WeatherManager.ClearWeatherHistory(_dateOpt);
         } else if (normalizedModel == "forecast") {
-            await WeatherManager.ClearForecasts();
+            Console.WriteLine("Clearing forecasts...");
+            isSuccess = await WeatherManager.ClearForecasts();
         }
 
-        return false;
+        if (isSuccess) {
+            Console.WriteLine("Clear successful");
+         } else {
+            Console.WriteLine("Clear failed. See logs for details");
+         }
     }
 
-    private bool Help(string? _) {
+    private void Help(string? _) {
         string help = """
             GunksAlert CLI - Maintenance Tool
             =================================
@@ -141,6 +312,14 @@ public class App {
                                     or clearing weather history. The date must be in the format
                                     `yyyy-MM-dd`.
 
+            -s, --start_date <DATE> Specify the start date for range-based tasks like updating
+                                    updating or clearing weather history. The date must be in the format
+                                    `yyyy-MM-dd`.
+
+            -e, --end_date <DATE>   Specify the end date for range-based tasks like updating
+                                    updating or clearing weather history. The date must be in the format
+                                    `yyyy-MM-dd`.
+
             -u, --update <VALUE>    Update forecast or weather history. Required value:
                                     - `forecast`
                                     - `weather-history`
@@ -152,7 +331,5 @@ public class App {
                                     Values are case-insensitive.
             """;
         Console.WriteLine(help);
-        
-        return false;
     }
 }

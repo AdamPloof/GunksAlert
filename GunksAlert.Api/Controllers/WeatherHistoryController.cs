@@ -48,6 +48,44 @@ public class WeatherHistoryController : ControllerBase {
         return Ok(content);
     }
 
+    [HttpGet("update-range/{startDate}/{endDate}", Name = "UpdateWeatherHistoryRange")]
+    public async Task<IActionResult> UpdateWeatherHistoryRange(string startDate, string endDate) {
+        Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");
+        if (!DateOnly.TryParseExact(startDate, "yyyy-MM-dd", out DateOnly start)) {
+            return Problem($"Start date must be in yyyy-MM-dd format. Got: {startDate}");
+        }
+
+        if (!DateOnly.TryParseExact(endDate, "yyyy-MM-dd", out DateOnly end)) {
+            return Problem($"End date must be in yyyy-MM-dd format. Got: {endDate}");
+        }
+
+        if (start > end) {
+            return Problem($"Start date {startDate} must be before end date {endDate}");
+        }
+
+        List<WeatherHistory> histories = new();
+        DateOnly historyDate = start;
+        while (historyDate <= end) {
+            // TODO: should probably roll back histories that were successfully added
+            WeatherHistory? history = await _weatherHistoryManager.FetchHistory(gunks, historyDate);
+            if (history == null) {
+                string dateStr = historyDate.ToString("yyyy-mm-dd");
+                return Problem($"Unable to fetch history for date: {dateStr}", null, 500);
+            }
+
+            histories.Add(history);
+        }
+        
+        ApiResponseContent content = new ApiResponseContent() {
+            Status = ApiResponseContent.ResponseStatus.Success,
+            Action = "Update",
+            Model = typeof(WeatherHistory).Name,
+            Data = [.. histories.Select(h => h.Id)]
+        };
+
+        return Ok(content);
+    }
+
     [HttpDelete("clear/{through?}", Name = "ClearWeatherHistory")]
     public async Task<IActionResult> ClearWeatherHistory(string through) {
         Crag gunks = await _context.Crags.FindAsync(1) ?? throw new Exception("Unable to find The Gunks");

@@ -24,4 +24,8 @@
     <ProjectReference Include="..\GunksAlert.Api\GunksAlert.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\GunksAlert.Cli\GunksAlert.Cli.csproj" />
+  </ItemGroup>
+
 </Project>
