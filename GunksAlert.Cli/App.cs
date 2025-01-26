@@ -23,7 +23,7 @@ public class App {
         public string? Value { get; init; }
     }
 
-    private List<AppAction> _options;
+    private List<AppAction> _actions;
     private DateTime? _dateOpt;
     private DateTime? _startDate;
     private DateTime? _endDate;
@@ -37,7 +37,7 @@ public class App {
 
         // Note: order of options is important. Earlier options are given precedence
         // and may short circuit later options.
-        _options = new List<AppAction>() {
+        _actions = new List<AppAction>() {
             new AppAction() {
                 ShortOpt = "-h",
                 LongOpt ="--help",
@@ -113,12 +113,14 @@ public class App {
     public Queue<AppAction> GetActionQueue(string[] args) {
         Queue<AppAction> actionQueue = new Queue<AppAction>();
         List<CliOption> opts = ParseOptions(args);
-        foreach (AppAction action in _options) {
+        ValidateOptions(opts);
+        foreach (AppAction action in _actions) {
             // Note: ValidateOptions checks for dups so this should only ever return one option
             CliOption? opt = opts.Where(
                 o => o.Name == action.ShortOpt || o.Name == action.LongOpt
             ).FirstOrDefault();
             if (opt != null) {
+                action.Value = opt.Value;
                 actionQueue.Enqueue(action);
             }
         }
@@ -172,7 +174,30 @@ public class App {
     /// </summary>
     /// <param name="options"></param>
     private void ValidateOptions(List<CliOption> options) {
+        // Keep track of the number of times an action is present in order to catch duplicates
+        Dictionary<string, int> actionCount = new Dictionary<string, int>();
+        foreach (CliOption opt in options) {
+            IEnumerable<AppAction> calledActions = _actions.Where(a => {
+                return a.LongOpt == opt.Name || a.ShortOpt == opt.Name;
+            });
 
+            AppAction a = calledActions.First();
+            if (actionCount.TryGetValue(a.LongOpt, out int count)) {
+                actionCount[a.LongOpt] += 1;
+            } else {
+                actionCount[a.LongOpt] = 1;
+            }
+
+            if (calledActions.Count() == 0) {
+                throw new ArgumentException($"Invalid option provided: {opt.Name}");
+            } else if (actionCount[a.LongOpt] > 1) {
+                throw new ArgumentException($"Duplicate option provided for {opt.Name}");
+            }
+
+            if (a.ValueRequired && opt.Value == null) {
+                throw new ArgumentException($"Option: {opt.Name} requires a value, none given");
+            }
+        }
     }
 
     private static DateTime ParseDateOpt(string opt) {

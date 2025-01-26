@@ -36,11 +36,7 @@ public class AppTests {
             "-h",
         };
         App app = new();
-        Queue<AppAction> actions = app.GetActionQueue(args);
-
-        foreach (AppAction action in actions) {
-            Assert.Null(action.Value);
-        }
+        Assert.Throws<ArgumentException>(() => app.GetActionQueue(args));
     }
 
     [Fact]
@@ -53,6 +49,10 @@ public class AppTests {
         App app = new();
         Queue<AppAction> actions = app.GetActionQueue(args);
 
+        AppAction help = actions.Dequeue();
+        Assert.Equal("-h", help.ShortOpt);
+        Assert.Null(help.Value);
+
         AppAction date = actions.Dequeue();
         Assert.Equal("--date", date.LongOpt);
         Assert.Equal("2024-11-01", date.Value);
@@ -60,10 +60,6 @@ public class AppTests {
         AppAction update = actions.Dequeue();
         Assert.Equal("--update", update.LongOpt);
         Assert.Equal("weather-history", update.Value);
-
-        AppAction help = actions.Dequeue();
-        Assert.Equal("-h", help.ShortOpt);
-        Assert.Null(help.Value);
     }
 
     [Fact]
@@ -78,6 +74,10 @@ public class AppTests {
         App app = new();
         Queue<AppAction> actions = app.GetActionQueue(args);
 
+        AppAction help = actions.Dequeue();
+        Assert.Equal("-h", help.ShortOpt);
+        Assert.Null(help.Value);
+
         AppAction date = actions.Dequeue();
         Assert.Equal("--date", date.LongOpt);
         Assert.Equal("2024-11-01", date.Value);
@@ -85,10 +85,6 @@ public class AppTests {
         AppAction update = actions.Dequeue();
         Assert.Equal("--update", update.LongOpt);
         Assert.Equal("weather-history", update.Value);
-
-        AppAction help = actions.Dequeue();
-        Assert.Equal("-h", help.ShortOpt);
-        Assert.Null(help.Value);
     }
 
     [Fact]
@@ -102,6 +98,10 @@ public class AppTests {
         App app = new();
         Queue<AppAction> actions = app.GetActionQueue(args);
 
+        AppAction help = actions.Dequeue();
+        Assert.Equal("-h", help.ShortOpt);
+        Assert.Null(help.Value);
+
         AppAction date = actions.Dequeue();
         Assert.Equal("--date", date.LongOpt);
         Assert.Equal("2024-11-01", date.Value);
@@ -109,10 +109,6 @@ public class AppTests {
         AppAction update = actions.Dequeue();
         Assert.Equal("--update", update.LongOpt);
         Assert.Equal("weather-history", update.Value);
-
-        AppAction help = actions.Dequeue();
-        Assert.Equal("-h", help.ShortOpt);
-        Assert.Null(help.Value);
     }
 
     [Fact]
