@@ -260,8 +260,8 @@ public class App {
         }
 
         bool isSuccess = false;
-        string normalizedModel = model.ToLower().Replace("_", string.Empty);
-        if (normalizedModel == "weatherhistory") {
+        string normalizedModel = model.ToLower();
+        if (normalizedModel == "weather-history") {
             if (_startDate != null && _endDate != null ){
                 DateTime start = (DateTime)_startDate;
                 DateTime end = (DateTime)_endDate;

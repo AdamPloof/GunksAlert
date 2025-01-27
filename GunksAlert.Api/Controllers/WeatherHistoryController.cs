@@ -11,6 +11,8 @@ namespace GunksAlert.Api.Controllers;
 [ApiController]
 [Route("api/weather-history")]
 public class WeatherHistoryController : ControllerBase {
+    private static readonly int MaxApiCallCount = 100;
+
     private readonly GunksDbContext _context;
     private readonly ILogger<WeatherHistoryController> _logger;
     private readonly WeatherHistoryManager _weatherHistoryManager;
@@ -65,7 +67,13 @@ public class WeatherHistoryController : ControllerBase {
 
         List<WeatherHistory> histories = new();
         DateOnly historyDate = start;
+        int callCount = 0;
         while (historyDate <= end) {
+            if (callCount > MaxApiCallCount) {
+                // Just in case the loop runs wild, prevent making too many API calls
+                break;
+            }
+
             // TODO: should probably roll back histories that were successfully added
             WeatherHistory? history = await _weatherHistoryManager.FetchHistory(gunks, historyDate);
             if (history == null) {
@@ -74,6 +82,8 @@ public class WeatherHistoryController : ControllerBase {
             }
 
             histories.Add(history);
+            historyDate = historyDate.AddDays(1);
+            callCount++;
         }
         
         ApiResponseContent content = new ApiResponseContent() {
