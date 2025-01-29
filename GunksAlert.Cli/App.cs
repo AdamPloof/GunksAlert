@@ -13,10 +13,6 @@ namespace GunksAlert.Cli;
 /// The main app class. Parses arguments and calls the actions. The _actions list maps command line
 /// args to methods.
 /// </summary>
-/// <remarks>
-/// All actions return a bool to indicate whether the app should continue executing other actions
-/// once complete with that one. 
-/// </remarks>
 public class App {
     public record CliOption {
         public required string Name { get; init; }
@@ -105,8 +101,6 @@ public class App {
 
     /// <summary>
     /// Parses command line args and returns the actions to be called in the appropriate order.
-    /// 
-    /// TODO: this should also check for invalid args
     /// </summary>
     /// <param name="args"></param>
     /// <returns>The actions to be invoked</returns>
@@ -181,6 +175,10 @@ public class App {
                 return a.LongOpt == opt.Name || a.ShortOpt == opt.Name;
             });
 
+            if (calledActions.Count() == 0) {
+                throw new ArgumentException($"Invalid option provided: {opt.Name}");
+            }
+
             AppAction a = calledActions.First();
             if (actionCount.TryGetValue(a.LongOpt, out int count)) {
                 actionCount[a.LongOpt] += 1;
@@ -188,9 +186,7 @@ public class App {
                 actionCount[a.LongOpt] = 1;
             }
 
-            if (calledActions.Count() == 0) {
-                throw new ArgumentException($"Invalid option provided: {opt.Name}");
-            } else if (actionCount[a.LongOpt] > 1) {
+            if (actionCount[a.LongOpt] > 1) {
                 throw new ArgumentException($"Duplicate option provided for {opt.Name}");
             }
 

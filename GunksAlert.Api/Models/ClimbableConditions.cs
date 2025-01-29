@@ -5,6 +5,12 @@ namespace GunksAlert.Api.Models;
 
 /// <summary>
 /// Represents the weather conditions that are considered climbable.
+/// 
+/// TODO:
+///     - change types to match forecast & history
+///     - Rethink how to represent ideal conditions since good conditions is a
+///     combination/calcualtion of multiple fields. For example, 40 degrees and very
+///     windy with clouds not good. 40 degrees with full sun and no wind, pretty good.
 /// </summary>
 public class ClimbableConditions {
     [Key]
@@ -17,16 +23,16 @@ public class ClimbableConditions {
     public required string Summary { get; set; }
 
     [Required]
-    public int TempMin { get; set; }
+    public double TempMin { get; set; }
 
     [Required]
-    public int TempMax { get; set; }
+    public double TempMax { get; set; }
 
     [Required]
-    public int WindSpeed { get; set; }
+    public double WindSpeed { get; set; }
 
     [Required]
-    public int WindGust { get; set; }
+    public double WindGust { get; set; }
 
     [Required]
     [Range(0, 360)]
@@ -42,7 +48,7 @@ public class ClimbableConditions {
 
     [Required]
     [Range(0, 100)]
-    public int Pop { get; set; }
+    public double Pop { get; set; }
 
     public double Rain { get; set; }
 
