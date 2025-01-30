@@ -37,63 +37,58 @@ public class ConditionsChecker {
     /// could use, but haven't found one.
     /// </remarks
     /// <param name="recentWeather"></param>
+    /// <param name="upcomingWeather"></param>
+    /// <param name="targetDate"></param>
     /// <returns>
     /// Likelyhood of being dry, between 0-1 with 1 being definitely dry and 0 being definitely wet
     /// </returns>
-    public static double CragIsDry(List<WeatherHistory> recentWeather) {
-        Dictionary<string, double> precipTotals = GetPrecipitationTotals(recentWeather);
+    public static double CragIsDry(
+        List<WeatherHistory> recentWeather,
+        List<Forecast> upcomingWeather,
+        DateOnly targetDate
+    ) {
+        double snowpack = EstimatedSnowpack(recentWeather);
 
         return 1.0;
     }
 
     /// <summary>
-    /// Get preciptiation totals from weather histories that includes
-    /// - snowLastWeek
-    /// - snowLastMonth
-    /// - rainLastThreeDays
-    /// - rainYesterday
+    /// Make an estimated guess about how much snow is on the ground as of today based on snow in the past 90
+    /// days minus melting.
     /// </summary>
+    /// <param name="seasonHistory">The season's weather history, up to 90 days</param>
     /// <returns></returns>
-    public static Dictionary<string, double> GetPrecipitationTotals(List<WeatherHistory> recentWeather) {
-        Dictionary<string, double> precipTotals = new Dictionary<string, double>() {
-            {"snowLastWeek", 0.0},
-            {"snowLastMonth", 0.0},
-            {"rainLastThreeDays", 0.0},
-            {"rainYesterday", 0.0}
-        };
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-        foreach (WeatherHistory history in recentWeather) {
-            int historyAge = today.DayNumber - history.Date.DayNumber;
-            if (historyAge > 30) {
-                // Only interested in the past 30 days
-                break;
+    public static double EstimatedSnowpack(List<WeatherHistory> seasonHistory) {
+        double snowpack = 0.0;
+        foreach (WeatherHistory weather in seasonHistory) {
+            double snowfall = 0.0;
+            if (weather.TempHigh < 35.6) {
+                // assume 10:1 snow-water ratio
+                snowfall = weather.Precipitation * 10;
+            } else if (weather.TempHigh < 41) {
+                // mix snow/rain
+                snowfall = (weather.Precipitation * 0.5) * 10;
+            } else {
+                snowfall = 0.0;
             }
-            if (historyAge == 1) {
-                if (history.TempHigh < 34.0) {
-                    // assume snow
-                    precipTotals["snowLastWeek"] += history.Precipitation;
-                    precipTotals["snowLastMonth"] += history.Precipitation;
-                } else {
-                    precipTotals["rainYesterday"] += history.Precipitation;
-                }
-            } else if (historyAge <= 3) {
-                if (history.TempHigh < 34.0) {
-                    // assume snow
-                    precipTotals["snowLastWeek"] += history.Precipitation;
-                    precipTotals["snowLastMonth"] += history.Precipitation;
-                } else {
-                    precipTotals["rainLastThreeDays"] += history.Precipitation;
-                }
-            } else if (historyAge <= 7 && history.TempHigh < 34.0) {
-                // assume snow
-                precipTotals["snowLastWeek"] += history.Precipitation;
-                precipTotals["snowLastMonth"] += history.Precipitation;
-            } else if (history.TempHigh < 34.0) {
-                precipTotals["snowLastMonth"] += history.Precipitation;
+
+            double meltFactor = 0.0;
+            if (weather.TempHigh > 32) {
+                // Base melt rate = 0.02 inches melt per day for every degree above freezing
+                meltFactor = (weather.TempHigh - 32) * 0.02;
+                meltFactor *= 1 - (weather.Clouds / 100); // more clouds, less melt
+                meltFactor *= 1 - (weather.Humidity / 100); // more humidity, less melt
+                meltFactor *= 1 + (weather.WindSpeed / 100); // more wind, more melt
+            } else {
+                meltFactor = 0.0;
             }
+
+            snowpack += snowfall;
+            snowpack -= meltFactor;
+            snowpack = snowpack < 0.0 ? 0.0 : snowpack;
         }
 
-        return precipTotals;
+        return snowpack;
     }
 
     /// <summary>
