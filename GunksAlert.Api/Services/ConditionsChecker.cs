@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Diagnostics;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +15,7 @@ namespace GunksAlert.Api.Services;
 /// of climbable conditions.
 /// </summary>
 public class ConditionsChecker {
+    private static readonly double DryRate = 0.05;
     private readonly GunksDbContext _context;
 
     public ConditionsChecker(GunksDbContext context) {
@@ -32,24 +35,130 @@ public class ConditionsChecker {
     /// Look at the recent weather history to get a sense of how likely the crag is to be dry.
     /// </summary>
     /// <remarks>
-    /// This is very rough guess especially if you we're dealing with trying to use weather history
+    /// This is very rough guess especially since we're dealing with trying to use weather history
     /// to predict snow pack and melt. Would be better if there was a current snow pack endpoint we
     /// could use, but haven't found one.
     /// </remarks
     /// <param name="recentWeather"></param>
     /// <param name="upcomingWeather"></param>
-    /// <param name="targetDate"></param>
+    /// <param name="targetDate">Assumed to always be later than today</param>
     /// <returns>
     /// Likelyhood of being dry, between 0-1 with 1 being definitely dry and 0 being definitely wet
     /// </returns>
-    public static double CragIsDry(
+    public static double CragWillBeDry(
         List<WeatherHistory> recentWeather,
         List<Forecast> upcomingWeather,
         DateOnly targetDate
     ) {
-        double snowpack = EstimatedSnowpack(recentWeather);
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);    
+        if (targetDate < today) {
+            throw new ArgumentException("Target date is before today");
+        }
+        
+        double chanceDryDayOf = ChanceDry(recentWeather, upcomingWeather, targetDate);
+        Forecast targetForecast = upcomingWeather.Where(
+            f => DateOnly.FromDateTime(f.Date.Date) == targetDate
+        ).First();
+        double chancePrecipitation = targetForecast.Pop + chanceDryDayOf;
+        double chanceDry =  1.0 - chancePrecipitation;
 
-        return 1.0;
+        return chanceDry > 0.0 ? chanceDry : 0.0;
+    }
+
+    public static double ChanceDry(
+        List<WeatherHistory> recentWeather,
+        List<Forecast> upcomingWeather,
+        DateOnly targetDate
+    ) {
+        double chanceDry = 1.0;
+        double precipitation = PrecipitaionTotal(recentWeather, upcomingWeather, targetDate);
+        chanceDry -= precipitation * DryRate;
+
+        double snowpack = EstimatedSnowpack(recentWeather);
+        chanceDry -= snowpack * DryRate;
+        
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);    
+        double precipitationDayBefore = 0.0;
+        if (targetDate == today) {
+            WeatherHistory yesterday = recentWeather.Where(
+                w => w.Date == today.AddDays(-1)
+            ).First();
+            precipitationDayBefore = yesterday.Precipitation;
+        } else {
+            Forecast dayBefore = upcomingWeather.Where(
+                f => DateOnly.FromDateTime(f.Date.Date) == targetDate.AddDays(-1)
+            ).First();
+            precipitationDayBefore = dayBefore.Rain;
+        }
+
+        // Additional penality if the rain happens the day before
+        chanceDry -= precipitationDayBefore * DryRate;
+
+        return chanceDry > 0.0 ? chanceDry : 0.0;
+    }
+
+    public static double PrecipitaionTotal(
+        List<WeatherHistory> recentWeather,
+        List<Forecast> upcomingWeather,
+        DateOnly targetDate
+    ) {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);    
+        int forecastDaysToReview = targetDate.DayNumber - today.DayNumber;
+        int historyDaysToReview = 3 - forecastDaysToReview;
+        historyDaysToReview = historyDaysToReview > 0 ? historyDaysToReview : 0;
+        double totalPrecipitaition = 0.0;
+        if (historyDaysToReview > 0) {
+            IEnumerable<WeatherHistory> historiesToReview = recentWeather.Where(w => {
+               return w.Date.DayNumber >= today.DayNumber - historyDaysToReview; 
+            });
+            Debug.Assert(
+                historyDaysToReview == historiesToReview.Count(),
+                "Histories needed to predict crag dryness not present"
+            );
+            totalPrecipitaition += PrecipitationAmount(historiesToReview.ToList());
+        }
+
+        IEnumerable<Forecast> forecastsToReview = upcomingWeather.Where(f => {
+            int forecastDayNum = DateOnly.FromDateTime(f.Date.Date).DayNumber;
+            return forecastDayNum >= targetDate.DayNumber - forecastDaysToReview;
+        });
+        Debug.Assert(
+            forecastDaysToReview == forecastsToReview.Count(),
+            "Forecasts needed to predict crag dryness not present"
+        );
+
+        totalPrecipitaition += PrecipitationAmount(forecastsToReview.ToList());
+
+        return totalPrecipitaition;
+    }
+
+    /// <summary>
+    /// Get the accumulated precipition amount from a list of weather histories
+    /// </summary>
+    /// <param name="recentWeather"></param>
+    /// <returns></returns>
+    public static double PrecipitationAmount(List<WeatherHistory> recentWeather) {
+        double precip = 0.0;
+        foreach (WeatherHistory history in recentWeather) {
+            precip += history.Precipitation;
+        }
+
+        return precip;
+    }
+
+    /// <summary>
+    /// Get the accumulated precipitation amount from a list of forecasts
+    /// </summary>
+    /// <param name="upcomingWeather"></param>
+    /// <returns></returns>
+    public static double PrecipitationAmount(List<Forecast> upcomingWeather) {
+        double precip = 0.0;
+        foreach (Forecast forecast in upcomingWeather) {
+            precip += forecast.Rain;
+            precip += forecast.Snow;
+        }
+
+        return precip;
     }
 
     /// <summary>
@@ -89,47 +198,6 @@ public class ConditionsChecker {
         }
 
         return snowpack;
-    }
-
-    /// <summary>
-    /// Get the number of recent days that likely had dry/drying conditions since
-    /// - yesterday
-    /// - last three days
-    /// - last week
-    /// - last month
-    /// 
-    /// <remarks>
-    /// Returns as dict of the date ranges and dryness count as a double. Uses double instead of int because
-    /// a likely dry day counts as 1, a *very* dry day (low humidity, high wind, full sun, etc) counts as 1.5
-    /// </remarks>
-    /// </summary>
-    /// <returns></returns>
-    public static Dictionary<string, double> GetDryDayCounts(List<WeatherHistory> recentWeather) {
-        Dictionary<string, double> dryDays = new Dictionary<string, double>() {
-            {"yesterday", 0.0},
-            {"lastThreeDays", 0.0},
-            {"lastWeek", 0.0},
-            {"lastMonth", 0.0},
-        };
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-        foreach (WeatherHistory history in recentWeather) {
-            int historyAge = today.DayNumber - history.Date.DayNumber;
-            if (historyAge > 30) {
-                // Only interested in the past 30 days
-                break;
-            }
-            if (historyAge == 1) {
-
-            } else if (historyAge <= 3) {
-
-            } else if (historyAge <= 7 && history.TempHigh < 34.0) {
-                
-            } else if (history.TempHigh < 34.0) {
-
-            }
-        }
-
-        return dryDays;
     }
 
     public bool DayIsClimbable(DateOnly day, Crag crag, ClimbableConditions conditions) {
