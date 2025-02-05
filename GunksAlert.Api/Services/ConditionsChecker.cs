@@ -15,6 +15,9 @@ namespace GunksAlert.Api.Services;
 /// of climbable conditions.
 /// </summary>
 public class ConditionsChecker {
+    // TODO: not thread safe, fix
+    public static DateOnly Today = DateOnly.FromDateTime(DateTime.Today);
+
     private static readonly double DryRate = 0.05;
     private readonly GunksDbContext _context;
 
