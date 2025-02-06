@@ -59,8 +59,9 @@ public class ConditionsChecker {
         Forecast targetForecast = upcomingWeather.Where(
             f => DateOnly.FromDateTime(f.Date.Date) == targetDate
         ).First();
-        double chancePrecipitation = targetForecast.Pop + chanceDryDayOf;
-        double chanceDry =  1.0 - chancePrecipitation;
+        // Amount of precipitation day of increases the significance of the chance of precipitation
+        double precipDayOfSignificance = 1.0 + ((targetForecast.Rain + targetForecast.Snow) / 10.0);
+        double chanceDry =  chanceDryDayOf - (targetForecast.Pop * precipDayOfSignificance);
 
         return chanceDry > 0.0 ? chanceDry : 0.0;
     }
@@ -71,6 +72,12 @@ public class ConditionsChecker {
         DateOnly currentDate,
         DateOnly targetDate
     ) {
+        if (recentWeather.Count() < 90) {
+            throw new ArgumentException(
+                "Predicting crag dryness requires at least 90 days of weather history"
+            );
+        }
+
         double chanceDry = 1.0;
         double precipitation = PrecipitaionTotal(recentWeather, upcomingWeather, currentDate, targetDate);
         chanceDry -= precipitation * DryRate;

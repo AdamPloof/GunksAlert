@@ -225,6 +225,7 @@ public class ConditionsCheckerTests {
             Humidity = _random.Next(0, 100),
             Rain = tempHigh < 36 ? 0.0 : precip,
             Snow = tempHigh < 36 ? precip : 0.0,
+            Pop = precip > 0.0 ? 1.0 : 0.0,
             WindSpeed = RandDouble(0.0, 15.0),
             WindDegree = _random.Next(0, 360)
         };

@@ -118,7 +118,7 @@ public class Forecast {
     public int Humidity { get; set; }
 
     [Required]
-    [Range(0, 100)]
+    [Range(0.0, 1.0)]
     [JsonPropertyName("pop")]
     public double Pop { get; set; }
 
