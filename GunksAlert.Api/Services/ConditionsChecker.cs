@@ -15,9 +15,6 @@ namespace GunksAlert.Api.Services;
 /// of climbable conditions.
 /// </summary>
 public class ConditionsChecker {
-    // TODO: not thread safe, fix
-    public static DateOnly Today = DateOnly.FromDateTime(DateTime.Today);
-
     private static readonly double DryRate = 0.05;
     private readonly GunksDbContext _context;
 
@@ -51,14 +48,14 @@ public class ConditionsChecker {
     public static double CragWillBeDry(
         List<WeatherHistory> recentWeather,
         List<Forecast> upcomingWeather,
+        DateOnly currentDate,
         DateOnly targetDate
     ) {
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);    
-        if (targetDate < today) {
-            throw new ArgumentException("Target date is before today");
+        if (targetDate < currentDate) {
+            throw new ArgumentException("Target date is before current date");
         }
         
-        double chanceDryDayOf = ChanceDry(recentWeather, upcomingWeather, targetDate);
+        double chanceDryDayOf = ChanceDry(recentWeather, upcomingWeather, currentDate, targetDate);
         Forecast targetForecast = upcomingWeather.Where(
             f => DateOnly.FromDateTime(f.Date.Date) == targetDate
         ).First();
@@ -71,20 +68,20 @@ public class ConditionsChecker {
     public static double ChanceDry(
         List<WeatherHistory> recentWeather,
         List<Forecast> upcomingWeather,
+        DateOnly currentDate,
         DateOnly targetDate
     ) {
         double chanceDry = 1.0;
-        double precipitation = PrecipitaionTotal(recentWeather, upcomingWeather, targetDate);
+        double precipitation = PrecipitaionTotal(recentWeather, upcomingWeather, currentDate, targetDate);
         chanceDry -= precipitation * DryRate;
 
         double snowpack = EstimatedSnowpack(recentWeather);
         chanceDry -= snowpack * DryRate;
         
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);    
         double precipitationDayBefore = 0.0;
-        if (targetDate == today) {
+        if (targetDate == currentDate) {
             WeatherHistory yesterday = recentWeather.Where(
-                w => w.Date == today.AddDays(-1)
+                w => w.Date == currentDate.AddDays(-1)
             ).First();
             precipitationDayBefore = yesterday.Precipitation;
         } else {
@@ -103,20 +100,20 @@ public class ConditionsChecker {
     public static double PrecipitaionTotal(
         List<WeatherHistory> recentWeather,
         List<Forecast> upcomingWeather,
+        DateOnly currentDate,
         DateOnly targetDate
     ) {
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);    
-        int forecastDaysToReview = targetDate.DayNumber - today.DayNumber;
+        int forecastDaysToReview = targetDate.DayNumber - currentDate.DayNumber;
         int historyDaysToReview = 3 - forecastDaysToReview;
         historyDaysToReview = historyDaysToReview > 0 ? historyDaysToReview : 0;
         double totalPrecipitaition = 0.0;
         if (historyDaysToReview > 0) {
             IEnumerable<WeatherHistory> historiesToReview = recentWeather.Where(w => {
-               return w.Date.DayNumber >= today.DayNumber - historyDaysToReview; 
+               return w.Date.DayNumber >= currentDate.DayNumber - historyDaysToReview; 
             });
             Debug.Assert(
                 historyDaysToReview == historiesToReview.Count(),
-                "Histories needed to predict crag dryness not present"
+                $"Histories needed to predict crag dryness not present. Expected {historiesToReview}, got {historiesToReview.Count()}"
             );
             totalPrecipitaition += PrecipitationAmount(historiesToReview.ToList());
         }
@@ -126,8 +123,8 @@ public class ConditionsChecker {
             return forecastDayNum >= targetDate.DayNumber - forecastDaysToReview;
         });
         Debug.Assert(
-            forecastDaysToReview == forecastsToReview.Count(),
-            "Forecasts needed to predict crag dryness not present"
+            forecastDaysToReview <= forecastsToReview.Count(),
+            $"Forecasts needed to predict crag dryness not present. Expected at least {forecastDaysToReview}, got {forecastsToReview.Count()}"
         );
 
         totalPrecipitaition += PrecipitationAmount(forecastsToReview.ToList());
@@ -165,7 +162,7 @@ public class ConditionsChecker {
     }
 
     /// <summary>
-    /// Make an estimated guess about how much snow is on the ground as of today based on snow in the past 90
+    /// Make an estimated guess about how much snow is on the ground as of current date based on snow in the past 90
     /// days minus melting.
     /// </summary>
     /// <param name="seasonHistory">The season's weather history, up to 90 days</param>

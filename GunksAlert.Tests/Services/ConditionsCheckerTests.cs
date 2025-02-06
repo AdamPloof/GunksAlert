@@ -10,115 +10,121 @@ using GunksAlert.Api.Models;
 public class ConditionsCheckerTests {
     private static readonly Random _random = new Random();
 
-    public ConditionsCheckerTests() {
-        ConditionsChecker.Today = new DateOnly(2025, 4, 1);
-    }
-
     [Fact]
     public void NoPrecipitionEverIsDry() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<Forecast> forecasts = MakeForecasts(new DateOnly(2025, 4, 1), 10, 0.0, 0.0);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 1, 1), 90, 0.0, 0.0);
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate) > 0.99);
+        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
     }
 
     [Fact]
     public void MeltedSnowNoRainIsDry() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<Forecast> forecasts = MakeForecasts(new DateOnly(2025, 4, 1), 10, 0.0, 0.0);
         List<WeatherHistory> janHistory = MakeHistories(new DateOnly(2025, 1, 1), 31, 0.0, 6.0);
         List<WeatherHistory> febMarHistory = MakeHistories(new DateOnly(2025, 2, 1), 59, 0.0, 0.0);
         List<WeatherHistory> histories = janHistory.Concat(febMarHistory).ToList();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate) > 0.99);
+        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
     }
 
     [Fact]
     public void NoSnowSomeRainLotsOfSunIsDry() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<Forecast> forecasts = MakeForecasts(new DateOnly(2025, 4, 1), 10, 0.0, 0.0);
         List<WeatherHistory> janFebHistory = MakeHistories(new DateOnly(2025, 1, 1), 31, 2.0, 0.0);
         List<WeatherHistory> marHistory = MakeHistories(new DateOnly(2025, 2, 1), 59, 0.0, 0.0);
         List<WeatherHistory> histories = janFebHistory.Concat(marHistory).ToList();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate) > 0.99);
+        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
     }
 
     [Fact]
     public void LotsOfSnowMonthsOfMeltAndSunIsDry() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<Forecast> forecasts = MakeForecasts(new DateOnly(2025, 4, 1), 10, 0.0, 0.0);
         List<WeatherHistory> janStart = MakeHistories(new DateOnly(2025, 1, 1), 2, 0.0, 24);
         List<WeatherHistory> restHistory = MakeHistories(new DateOnly(2025, 1, 3), 88, 0.0, 0.0);
         List<WeatherHistory> histories = janStart.Concat(restHistory).ToList();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate) > 0.99);
+        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
     }
 
     [Fact]
     public void NoPrecipHistoryLightPrecipForecastWithSunBeforeIsDry() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 1, 1), 90, 0.0, 0.0);
         List<Forecast> earlyWeek = MakeForecasts(new DateOnly(2025, 4, 1), 2, 0.5, 0.0);
         List<Forecast> restOfWeek = MakeForecasts(new DateOnly(2025, 4, 3), 8, 0.0, 0.0);
         List<Forecast> forecasts = earlyWeek.Concat(restOfWeek).ToList();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate) > 0.99);
+        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
     }
 
     [Fact]
     public void NoPrecipHistoryRainDayOfIsWet() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 1, 1), 90, 0.0, 0.0);
         List<Forecast> mostOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 9, 0.0, 0.0);
         List<Forecast> dayOf = MakeForecasts(new DateOnly(2025, 4, 10), 1, 1.0, 0.0);
         List<Forecast> forecasts = mostOfWeek.Concat(dayOf).ToList();
 
-        Assert.Equal(0.0, ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate));
+        Assert.Equal(0.0, ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate));
     }
 
     [Fact]
     public void LotsOfRainWeekOfDryTargetDateIsWet() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 1, 1), 90, 0.0, 0.0);
         List<Forecast> mostOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 9, 4.5, 0.0);
         List<Forecast> dayOf = MakeForecasts(new DateOnly(2025, 4, 10), 1, 0.0, 0.0);
         List<Forecast> forecasts = mostOfWeek.Concat(dayOf).ToList();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate) < 0.3);
+        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) < 0.3);
     }
 
     [Fact]
     public void LotsOfSnowNotMeltedIsWet() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 1, 1), 90, 0.0, 0.0);
         List<Forecast> mostOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 8, 0.0, 12.0);
         List<Forecast> twoDaysOf = MakeForecasts(new DateOnly(2025, 4, 9), 2, 0.0, 0.0);
         List<Forecast> forecasts = mostOfWeek.Concat(twoDaysOf).ToList();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate) < 0.3);
+        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) < 0.3);
     }
 
     [Fact]
     public void NotEnoughHistoryThrows() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<Forecast> forecasts = MakeForecasts(new DateOnly(2025, 4, 1), 10, 0.0, 0.0);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 3, 1), 30, 0.0, 0.0);
 
         Assert.Throws<ArgumentException>(
-            () => ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate)
+            () => ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate)
         );
     }
 
     [Fact]
     public void TargetDateInThePastThrows() {
+        DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2023, 4, 10);
         List<Forecast> forecasts = MakeForecasts(new DateOnly(2023, 4, 1), 10, 0.0, 0.0);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2023, 1, 1), 90, 0.0, 0.0);
 
         Assert.Throws<ArgumentException>(
-            () => ConditionsChecker.CragWillBeDry(histories, forecasts, targetDate)
+            () => ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate)
         );
     }
 
