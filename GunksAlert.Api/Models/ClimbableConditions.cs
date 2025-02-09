@@ -1,5 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+
+using GunksAlert.Api.Services.Attributes;
 
 namespace GunksAlert.Api.Models;
 
@@ -16,8 +20,10 @@ public class ClimbableConditions {
     [Key]
     public int Id { get; private set; }
 
-    [Required]
-    public DateTimeOffset Date { get; set; }
+    [ForeignKey("Crag")]
+    [JsonIgnore]
+    [NonZero]
+    public int CragId { get; set; }
 
     [StringLength(200)]
     public required string Summary { get; set; }

@@ -15,6 +15,7 @@ public class GunksDbContext : DbContext {
     public DbSet<ClimbableConditions> ClimbableConditions { get; set; } = null!;
     public DbSet<AlertPeriod> AlertPeriods { get; set; } = null!;
     public DbSet<AlertCriteria> AlertCriterias { get; set; } = null!;
+    public DbSet<ClimbabilityReport> ClimbabilityReports { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         modelBuilder.HasDefaultSchema("public");
@@ -26,5 +27,6 @@ public class GunksDbContext : DbContext {
         modelBuilder.Entity<ClimbableConditions>().ToTable("ClimbableConditions");
         modelBuilder.Entity<AlertPeriod>().ToTable("AlertPeriod");
         modelBuilder.Entity<AlertCriteria>().ToTable("AlertCriteria");
+        modelBuilder.Entity<ClimbabilityReport>().ToTable("ClimbabilityReport");
     }
 }

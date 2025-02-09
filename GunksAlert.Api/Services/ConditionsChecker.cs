@@ -6,12 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 using GunksAlert.Api.Models;
 using GunksAlert.Api.Data;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GunksAlert.Api.Services;
 
 /// <summary>
 /// ConditionsChecker is responsible for inspecting the recent weather history of a crag and the
-/// upcomming forecast and making the call on whether an alert should be sent to notify climbers
+/// upcoming forecast and making the call on whether an alert should be sent to notify climbers
 /// of climbable conditions.
 /// </summary>
 public class ConditionsChecker {
@@ -22,13 +23,123 @@ public class ConditionsChecker {
         _context = context;
     }
 
-    public static bool ForecastLooksGood(
-        Forecast forecast,
-        ClimbableConditions conditions
+    /// <summary>
+    /// Check the conditions for a given day and return a report on whether that day
+    /// will be climbable. Fetches required forecasts and weather history from the database.
+    /// </summary>
+    /// <param name="conditions"></param>
+    /// <param name="currentDate"></param>
+    /// <param name="targetDate"></param>
+    /// <returns></returns>
+    public ClimbabilityReport ConditionsReport(
+        ClimbableConditions conditions,
+        DateOnly currentDate,
+        DateOnly targetDate
     ) {
+        DateTimeOffset currentDt = new DateTimeOffset(
+            currentDate.Year,
+            currentDate.Month,
+            currentDate.Day,
+            0, 0, 0, TimeSpan.MinValue
+        );
+        DateTimeOffset targetDt = new DateTimeOffset(
+            targetDate.Year,
+            targetDate.Month,
+            targetDate.Day,
+            0, 0, 0, TimeSpan.MinValue
+        );
+        List<Forecast> upcomingWeather = _context.Forecasts.Where(
+            f => f.Date >= currentDt && f.Date <= targetDt
+        ).ToList();
+        DateOnly startHistory = currentDate.AddDays(-90);
+        List<WeatherHistory> recentWeather = _context.WeatherHistories.Where(
+            h => h.Date >= startHistory
+        ).ToList();
 
+        return CheckConditions(
+            recentWeather,
+            upcomingWeather,
+            conditions,
+            currentDate,
+            targetDate
+        );
+    }
 
-        return true;
+    /// <summary>
+    /// Gathers all the information about what makes for a climbable day.
+    /// </summary>
+    /// <param name="recentWeather"></param>
+    /// <param name="upcomingWeather"></param>
+    /// <param name="conditions"></param>
+    /// <param name="currentDate"></param>
+    /// <param name="targetDate"></param>
+    /// <returns></returns>
+    public static ClimbabilityReport CheckConditions(
+        List<WeatherHistory> recentWeather,
+        List<Forecast> upcomingWeather,
+        ClimbableConditions conditions,
+        DateOnly currentDate,
+        DateOnly targetDate
+    ) {
+        ClimbabilityReport summary = new() {
+            Date = targetDate,
+            CragId = conditions.CragId
+        };
+        DateTimeOffset dt = new DateTimeOffset(
+            targetDate.Year,
+            targetDate.Month,
+            targetDate.Day,
+            0, 0, 0, TimeSpan.MinValue
+        );
+        Forecast targetForecast = upcomingWeather.Where(f => f.Date == dt).First();
+        ForecastLooksGood(targetForecast, conditions, ref summary);
+        summary.ChanceDry = CragWillBeDry(recentWeather, upcomingWeather, currentDate, targetDate);
+
+        return summary;
+    }
+
+    public static void ForecastLooksGood(
+        Forecast forecast,
+        ClimbableConditions conditions,
+        ref ClimbabilityReport summary
+    ) {
+        double feelsLike = forecast.TempFeelsLikeDay;
+        if (feelsLike >= conditions.TempMin && feelsLike <= conditions.TempMax) {
+            summary.TempGood = true;
+            summary.WindGood = true;
+        } else {
+            summary.TempGood = false;
+            if (feelsLike < conditions.TempMin && forecast.TempHigh >= conditions.TempMin) {
+                // Wind was a factor
+                summary.WindGood = false;
+            } else {
+                summary.WindGood = true;
+            }
+        }
+
+        // Not really doing much with clouds or humidity right now
+        summary.CloudsGood = true;
+        summary.HumidityGood = true;
+    }
+
+    /// <summary>
+    /// Get the wind chill temperature for a forecast.
+    /// </summary>
+    /// <remarks>
+    /// Only relevant to temperatures at or below 50 degrees and wind speeds
+    /// greater than 3mph.
+    /// <see href="https://www.weather.gov/media/epz/wxcalc/windChill.pdf"/>
+    /// </remarks>
+    /// <param name="forecast"></param>
+    /// <returns></returns>
+    public static double WindChill(Forecast forecast) {
+        if (forecast.TempHigh > 50.0 || forecast.WindSpeed <= 3.0) {
+            return forecast.TempHigh;
+        }
+
+        double windChill = 35.74 + (0.6215 * forecast.TempHigh) - (35.75 * Math.Pow(forecast.WindSpeed, 0.16)) + (0.4275 * forecast.TempHigh * Math.Pow(forecast.WindSpeed, 0.16));
+
+        return windChill;
     }
 
     /// <summary>
@@ -227,10 +338,5 @@ public class ConditionsChecker {
         }
 
         return snowpack;
-    }
-
-    public bool DayIsClimbable(DateOnly day, Crag crag, ClimbableConditions conditions) {
-
-        return true;
     }
 }

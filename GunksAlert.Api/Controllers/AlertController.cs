@@ -36,7 +36,6 @@ public class AlertController : Controller {
 
         DateTimeOffset today = new DateTimeOffset();
         ClimbableConditions conditions = new ClimbableConditions() {
-            Date = today,
             Summary = "A good day at the Gunks",
             TempMin = 40,
             TempMax = 85,
@@ -50,10 +49,10 @@ public class AlertController : Controller {
             Snow = 0.0
         };
         DateTimeOffset weekend = today.AddDays(5);
-        _conditionsChecker.DayIsClimbable(
-            DateOnly.FromDateTime(weekend.DateTime),
-            crag,
-            conditions
+        ClimbabilityReport report = _conditionsChecker.ConditionsReport(
+            conditions,
+            DateOnly.FromDateTime(today.DateTime),
+            DateOnly.FromDateTime(weekend.DateTime)
         );
 
         return View();

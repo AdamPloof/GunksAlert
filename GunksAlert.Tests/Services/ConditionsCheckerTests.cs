@@ -5,8 +5,6 @@ using Xunit;
 using GunksAlert.Api.Services;
 using GunksAlert.Api.Models;
 
-// TODO: ConditionsChecker relies on getting todays date to know how much history and forecast to check.
-// consider setting Today to a static property so that it can be modified for tests.
 public class ConditionsCheckerTests {
     private static readonly Random _random = new Random();
 
