@@ -15,7 +15,7 @@ namespace GunksAlert.Api.Services;
 /// of climbable conditions.
 /// </summary>
 public class ConditionsChecker {
-    private static readonly double DryRate = 0.05;
+    private static readonly double DryRate = 0.1;
     private readonly GunksDbContext _context;
 
     public ConditionsChecker(GunksDbContext context) {
@@ -147,7 +147,18 @@ public class ConditionsChecker {
     public static double PrecipitationAmount(List<WeatherHistory> recentWeather) {
         double precip = 0.0;
         foreach (WeatherHistory history in recentWeather) {
-            precip += history.Precipitation;
+            if (history.Precipitation > 0.0) {
+                precip += history.Precipitation;
+            } else if (history.TempHigh > 32) {
+                double dryFactor = 0.0;
+                dryFactor = (history.TempHigh - 32) * 0.02;
+                dryFactor *= 1 - (history.Clouds / 100); // more clouds, less drying
+                dryFactor *= 1 - (history.Humidity / 100); // more humidity, less drying
+                dryFactor *= 1 + (history.WindSpeed / 100); // more wind, more drying
+                precip -= dryFactor;
+
+                precip = precip > 0.0 ? precip : 0.0;
+            }
         }
 
         return precip;
@@ -161,8 +172,19 @@ public class ConditionsChecker {
     public static double PrecipitationAmount(List<Forecast> upcomingWeather) {
         double precip = 0.0;
         foreach (Forecast forecast in upcomingWeather) {
-            precip += forecast.Rain;
-            precip += forecast.Snow;
+            if (forecast.Rain > 0.0 || forecast.Snow > 0.0) {
+                precip += forecast.Rain;
+                precip += forecast.Snow;
+            } else if (forecast.TempHigh > 32) {
+                double dryFactor = 0.0;
+                dryFactor = (forecast.TempHigh - 32) * 0.02;
+                dryFactor *= 1 - (forecast.Clouds / 100); // more clouds, less drying
+                dryFactor *= 1 - (forecast.Humidity / 100); // more humidity, less drying
+                dryFactor *= 1 + (forecast.WindSpeed / 100); // more wind, more drying
+                precip -= dryFactor;
+
+                precip = precip > 0.0 ? precip : 0.0;
+            }
         }
 
         return precip;

@@ -85,11 +85,13 @@ public class ConditionsCheckerTests {
         DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 1, 1), 90, 0.0, 0.0);
-        List<Forecast> mostOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 9, 4.5, 0.0);
-        List<Forecast> dayOf = MakeForecasts(new DateOnly(2025, 4, 10), 1, 0.0, 0.0);
-        List<Forecast> forecasts = mostOfWeek.Concat(dayOf).ToList();
+        List<Forecast> beginningOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 6, 1.0, 0.0);
+        List<Forecast> endOfWeek = MakeForecasts(new DateOnly(2025, 4, 7), 3, 3.5, 0.0);
+        Forecast dayOf = MakeForecast(new DateOnly(2025, 4, 10), 0.0, 50.0, 45.0);
+        List<Forecast> forecasts = beginningOfWeek.Concat(endOfWeek).ToList();
+        forecasts.Add(dayOf);
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) < 0.3);
+        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) < 0.68);
     }
 
     [Fact]
@@ -146,23 +148,33 @@ public class ConditionsCheckerTests {
         double rain,
         double snow
     ) {
+        snow /= 10; // snow-water ratio
         List<WeatherHistory> histories = new();
         for (int i = 0; i < numDays; i++) {
             DateOnly date = startDate.AddDays(i);
             if (snow > 0.0) {
                 // Snow
-                double dailySnow = RandDouble(0.0, snow);
+                double dailySnow = snow < 0.1 ? snow : RandDouble(0.0, snow);
                 snow -= dailySnow;
                 histories.Add(MakeHistory(date, dailySnow, RandDouble(0, 32), RandDouble(0, 28)));
             } else if (rain > 0.0) {
                 // Rain
-                double dailyRain = RandDouble(0.0, rain);
+                double dailyRain = rain < 0.1 ? rain : RandDouble(0.0, rain);
                 rain -= dailyRain;
                 histories.Add(MakeHistory(date, dailyRain, RandDouble(37, 75), RandDouble(37, 67)));
             } else {
                 // Dry
                 histories.Add(MakeHistory(date, 0.0, RandDouble(37, 75), RandDouble(37, 67)));
             }
+        }
+
+        // not the most realistic way of adding remaining precip, but it'll do
+        if (snow > 0.0) {
+            histories[histories.Count - 1].Precipitation += snow;
+        }
+
+        if (rain > 0.0) {
+            histories[histories.Count - 1].Precipitation += rain;
         }
 
         return histories;
@@ -198,18 +210,27 @@ public class ConditionsCheckerTests {
             DateOnly date = startDate.AddDays(i);
             if (snow > 0.0) {
                 // Snow
-                double dailySnow = RandDouble(0.0, snow);
+                double dailySnow = snow < 0.1 ? snow : RandDouble(0.0, snow);
                 snow -= dailySnow;
                 forecasts.Add(MakeForecast(date, dailySnow, RandDouble(0, 32), RandDouble(0, 28)));
             } else if (rain > 0.0) {
                 // Rain
-                double dailyRain = RandDouble(0.0, rain);
+                double dailyRain = rain < 0.1 ? rain : RandDouble(0.0, rain);
                 rain -= dailyRain;
                 forecasts.Add(MakeForecast(date, dailyRain, RandDouble(37, 75), RandDouble(37, 67)));
             } else {
                 // Dry
                 forecasts.Add(MakeForecast(date, 0.0, RandDouble(37, 75), RandDouble(37, 67)));
             }
+        }
+
+        // not the most realistic way of adding remaining precip, but it'll do
+        if (snow > 0.0) {
+            forecasts[forecasts.Count - 1].Snow += snow;
+        }
+
+        if (rain > 0.0) {
+            forecasts[forecasts.Count - 1].Rain += rain;
         }
 
         return forecasts;
