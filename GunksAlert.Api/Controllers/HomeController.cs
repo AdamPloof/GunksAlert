@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Encodings.Web;
 
 using GunksAlert.Api.Models;
+using GunksAlert.Api.Services;
 
 namespace GunksAlert.Api.Controllers;
 
@@ -15,13 +16,6 @@ public class HomeController : Controller {
 
     [Route("/", Name = "Home")]
     public IActionResult Index() {
-        return View();
-    }
-
-    [Route("/foo/{name}", Name = "Foo")]
-    public IActionResult Foo(string name) {
-        ViewData["name"] = name;
-
         return View();
     }
 

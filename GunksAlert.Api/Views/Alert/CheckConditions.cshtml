@@ -1,8 +1,28 @@
+@model GunksAlert.Api.Models.ClimbabilityReport
+
 @{
     ViewData["Title"] = "Alerts";
 }
 
-
-<pre>
-    @ViewData["isClimbable"]
-</pre>
+<div class="model-container d-flex flex-column">
+    <div class="w-100">
+        <h2>Climbability Report</h2>
+    </div>
+    <div class="report-body">
+        @if (Model != null) {
+            <ul>
+                <li><strong>Date:</strong> @Model.Date.ToString("MMM d, yyyy")</li>
+                <li><strong>Crag:</strong> The Gunks</li>
+                <li><strong>Climbable:</strong> @(Model.IsClimbable() ? "Yes" : "No")</li>
+                <li><strong>Summary:</strong> @Model.Summary()</li>
+                <li><strong>Temperature:</strong> @(Model.TempGood ? "Acceptable" : "Not acceptable")</li>
+                <li><strong>Chance dry:</strong> @(Model.ChanceDry * 100)%</li>
+                <li><strong>Wind:</strong> @(Model.WindGood ? "Acceptable" : "Not acceptable")</li>
+                <li><strong>Clouds:</strong> @(Model.CloudsGood ? "Acceptable" : "Not acceptable")</li>
+                <li><strong>Humidity:</strong> @(Model.HumidityGood ? "Acceptable" : "Not acceptable")</li>
+            </ul>
+        } else {
+            <p>No report found</p>
+        }
+    </div>
+</div>

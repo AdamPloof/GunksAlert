@@ -23,7 +23,7 @@ public class AlertController : Controller {
         _logger = logger;
     }
 
-    [Route("/alert/check-conditions/{cragId}", Name = "CheckCrag")]
+    [Route("/alert/check-conditions/{cragId}", Name = "CheckConditions")]
     public IActionResult CheckConditions(int cragId) {
         Crag? crag = _context.Crags.Find(cragId);
         if (crag == null) {
@@ -34,7 +34,7 @@ public class AlertController : Controller {
             ViewData["isClimbable"] = $"yep {crag.Name}";
         }
 
-        DateTimeOffset today = new DateTimeOffset();
+        DateTimeOffset today = DateTimeOffset.Now;
         ClimbableConditions conditions = new ClimbableConditions() {
             Summary = "A good day at the Gunks",
             TempMin = 40,
@@ -55,6 +55,6 @@ public class AlertController : Controller {
             DateOnly.FromDateTime(weekend.DateTime)
         );
 
-        return View();
+        return View(report);
     }
 }

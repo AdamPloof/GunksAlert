@@ -37,17 +37,15 @@ public class ConditionsChecker {
         DateOnly targetDate
     ) {
         DateTimeOffset currentDt = new DateTimeOffset(
-            currentDate.Year,
-            currentDate.Month,
-            currentDate.Day,
-            0, 0, 0, TimeSpan.MinValue
+            currentDate.ToDateTime(new TimeOnly(0, 0)),
+            TimeSpan.Zero
         );
         DateTimeOffset targetDt = new DateTimeOffset(
-            targetDate.Year,
-            targetDate.Month,
-            targetDate.Day,
-            0, 0, 0, TimeSpan.MinValue
+            targetDate.ToDateTime(new TimeOnly(0, 0)),
+            TimeSpan.Zero
         );
+
+        // TODO: this is returning an empty list??
         List<Forecast> upcomingWeather = _context.Forecasts.Where(
             f => f.Date >= currentDt && f.Date <= targetDt
         ).ToList();
@@ -86,10 +84,8 @@ public class ConditionsChecker {
             CragId = conditions.CragId
         };
         DateTimeOffset dt = new DateTimeOffset(
-            targetDate.Year,
-            targetDate.Month,
-            targetDate.Day,
-            0, 0, 0, TimeSpan.MinValue
+            targetDate.ToDateTime(new TimeOnly(0, 0)),
+            TimeSpan.Zero
         );
         Forecast targetForecast = upcomingWeather.Where(f => f.Date == dt).First();
         ForecastLooksGood(targetForecast, conditions, ref summary);
@@ -323,8 +319,8 @@ public class ConditionsChecker {
 
             double meltFactor = 0.0;
             if (weather.TempHigh > 32) {
-                // Base melt rate = 0.02 inches melt per day for every degree above freezing
-                meltFactor = (weather.TempHigh - 32) * 0.02;
+                // Base melt rate = 0.5mm melt per day for every degree above freezing
+                meltFactor = (weather.TempHigh - 32) * 0.5;
                 meltFactor *= 1 - (weather.Clouds / 100); // more clouds, less melt
                 meltFactor *= 1 - (weather.Humidity / 100); // more humidity, less melt
                 meltFactor *= 1 + (weather.WindSpeed / 100); // more wind, more melt

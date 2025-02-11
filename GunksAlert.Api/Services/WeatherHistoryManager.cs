@@ -26,7 +26,7 @@ public class WeatherHistoryManager {
     }
 
     /// <summary>
-    /// Get the weather history for a specific data.
+    /// Get the weather history for a specific date.
     /// </summary>
     /// <param name="crag"></param>
     /// <returns>The number of daily histories fetched</returns>
