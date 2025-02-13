@@ -19,6 +19,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<OpenWeatherBridge, OpenWeatherBridge>();
 builder.Services.AddScoped<ForecastManager, ForecastManager>();
 builder.Services.AddScoped<WeatherHistoryManager, WeatherHistoryManager>();
+builder.Services.AddScoped<WeatherManager, WeatherManager>();
 builder.Services.AddScoped<ConditionsChecker, ConditionsChecker>();
 
 var app = builder.Build();
