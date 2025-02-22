@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 using GunksAlert.Api.Data;
@@ -11,24 +12,38 @@ using GunksAlert.Api.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Controllers
 builder.Services.AddControllersWithViews();
 
-// Configure DB connection
+// Database
 builder.Services.AddDbContext<GunksDbContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("GunksAlert"))
 );
 
+// Security
 builder.Services.AddIdentity<AppUser, IdentityRole>(options => {
     options.SignIn.RequireConfirmedAccount = false;
 }).AddEntityFrameworkStores<GunksDbContext>();
 
+builder.Services.AddAuthorization(options => {
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+builder.Services.AddAuthentication().AddCookie(options => {
+    options.LoginPath = "/login";
+    options.LogoutPath = "/logout";
+});
+
+// General services
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<OpenWeatherBridge, OpenWeatherBridge>();
 builder.Services.AddScoped<ForecastManager, ForecastManager>();
 builder.Services.AddScoped<WeatherHistoryManager, WeatherHistoryManager>();
 builder.Services.AddScoped<WeatherManager, WeatherManager>();
 builder.Services.AddScoped<ConditionsChecker, ConditionsChecker>();
+builder.Services.AddScoped<IAuthenticationProvider, PasswordAuthenticationProvider>();
 
 var app = builder.Build();
 
