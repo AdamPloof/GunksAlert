@@ -81,7 +81,7 @@ public class ConditionsChecker {
     ) {
         ClimbabilityReport summary = new() {
             Date = targetDate,
-            CragId = conditions.CragId
+            CragId = 1
         };
         DateTimeOffset dt = new DateTimeOffset(
             targetDate.ToDateTime(new TimeOnly(0, 0)),

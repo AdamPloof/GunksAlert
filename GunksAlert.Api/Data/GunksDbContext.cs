@@ -1,9 +1,13 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+
 using GunksAlert.Api.Models;
+using GunksAlert.Api.Security;
 
 namespace GunksAlert.Api.Data;
 
-public class GunksDbContext : DbContext {
+public class GunksDbContext : IdentityDbContext<AppUser> {
     public GunksDbContext(
         DbContextOptions<GunksDbContext> options
     ) : base(options) {}
@@ -18,6 +22,8 @@ public class GunksDbContext : DbContext {
     public DbSet<ClimbabilityReport> ClimbabilityReports { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.HasDefaultSchema("public");
 
         modelBuilder.Entity<Crag>().ToTable("Crag");

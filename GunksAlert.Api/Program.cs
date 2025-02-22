@@ -1,9 +1,13 @@
 using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+
 using GunksAlert.Api.Data;
 using GunksAlert.Api.Services;
+using GunksAlert.Api.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +18,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<GunksDbContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("GunksAlert"))
 );
+
+builder.Services.AddIdentity<AppUser, IdentityRole>(options => {
+    options.SignIn.RequireConfirmedAccount = false;
+}).AddEntityFrameworkStores<GunksDbContext>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<OpenWeatherBridge, OpenWeatherBridge>();
@@ -49,6 +57,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 #pragma warning disable ASP0014

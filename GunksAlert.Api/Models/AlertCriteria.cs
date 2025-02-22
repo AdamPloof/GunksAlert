@@ -2,6 +2,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using GunksAlert.Api.Security;
+using GunksAlert.Api.Services.Attributes;
+
 namespace GunksAlert.Api.Models;
 
 /// <summary>
@@ -17,8 +20,8 @@ public class AlertCriteria {
     [Key]
     public int Id { get; private set; }
 
-    [Required]
     [ForeignKey("Crag")]
+    [NonZero]
     public int CragId { get; set; }
 
     public required Crag Crag { get; set; }
@@ -34,4 +37,6 @@ public class AlertCriteria {
     public int AlertPeriodId { get; set; }
 
     public required AlertPeriod AlertPeriod { get; set; }
+
+    public List<AppUser> AppUsers { get; } = new List<AppUser>();
 }
