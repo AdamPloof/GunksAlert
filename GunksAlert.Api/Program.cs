@@ -31,7 +31,7 @@ builder.Services.AddAuthorization(options => {
         .Build();
 });
 
-builder.Services.AddAuthentication().AddCookie(options => {
+builder.Services.ConfigureApplicationCookie(options => {
     options.LoginPath = "/login";
     options.LogoutPath = "/logout";
 });
@@ -46,6 +46,17 @@ builder.Services.AddScoped<ConditionsChecker, ConditionsChecker>();
 builder.Services.AddScoped<IAuthenticationProvider, PasswordAuthenticationProvider>();
 
 var app = builder.Build();
+
+// Ensure roles are set up
+using (AsyncServiceScope scope = app.Services.CreateAsyncScope()) {
+    IServiceProvider services = scope.ServiceProvider;
+    await RoleSeeder.InitializeRoles(services);
+
+    IConfiguration config = services.GetRequiredService<IConfiguration>();
+    List<string> admins = config.GetSection("AdminUsers").Get<List<string>>()
+        ?? throw new ArgumentException("AdminUsers config not set");
+    await RoleSeeder.AssignAdmins(services, admins);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {

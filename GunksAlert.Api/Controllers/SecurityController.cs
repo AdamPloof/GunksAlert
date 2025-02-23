@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 using GunksAlert.Api.Security;
+using GunksAlert.Api.ViewModels;
 
 namespace GunksAlert.Api.Controllers;
 
@@ -32,15 +33,19 @@ public class SecurityController : Controller {
     [HttpPost("login", Name = "login")]
     [ValidateAntiForgeryToken]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(string identifier, string secret) {
-        SignInResult result = await _authProvider.LoginAsync(identifier, secret);
+    public async Task<IActionResult> Login(PasswordLoginViewModel model) {
+        if (!ModelState.IsValid) {
+            return View(model);
+        }
+
+        SignInResult result = await _authProvider.LoginAsync(model.Username, model.Password);
         if (result.Succeeded) {
             return RedirectToAction("Index", "Home");
         }
 
         ModelState.AddModelError("", "Invalid login attempt");
 
-        return View();
+        return View(model);
     }
 
     [HttpGet("register", Name = "register")]
@@ -52,8 +57,12 @@ public class SecurityController : Controller {
     [HttpPost("register", Name = "register")]
     [ValidateAntiForgeryToken]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(string identifier, string secret) {
-        IdentityResult result = await _authProvider.RegisterAsync(identifier, secret);
+    public async Task<IActionResult> Register(PasswordRegisterViewModel model) {
+        if (!ModelState.IsValid) {
+            return View(model);
+        }
+
+        IdentityResult result = await _authProvider.RegisterAsync(model.Username, model.Password);
         if (result.Succeeded) {
             return RedirectToAction("Index", "Home");
         }
@@ -62,7 +71,7 @@ public class SecurityController : Controller {
             ModelState.AddModelError("", err.Description);
         }
 
-        return View();
+        return View(model);
     }
 
     [HttpPost("logout", Name = "logout")]

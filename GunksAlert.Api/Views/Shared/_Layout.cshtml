@@ -6,7 +6,7 @@
     <title>@ViewData["Title"] - GunksAlert</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GunksAlert.styles.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/GunksAlert.styles.css" asp-append-version="true" /> *@
 </head>
 <body>
     <header>
@@ -18,23 +18,41 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a 
-                                class="nav-link text-dark"
-                                asp-controller="Alert"
-                                asp-action="CheckConditions"
-                                asp-route-name="CheckConditions"
-                                asp-route-cragId="1"
-                            >Check Conditions</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+                    <div class="nav-left">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a 
+                                    class="nav-link text-dark"
+                                    asp-controller="Alert"
+                                    asp-action="CheckConditions"
+                                    asp-route-name="CheckConditions"
+                                    asp-route-cragId="1"
+                                >Check Conditions</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="nav-right">
+                        <ul class="navbar-nav flex-grow-1 align-items-center">
+                            @if (User.Identity != null && User.Identity.IsAuthenticated) {
+                                <li class="nav-item text-muted">
+                                    @User.Identity.Name
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Security" asp-action="Logout">Logout</a>
+                                </li>
+                            } else {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Security" asp-action="Login">Login</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
             </div>
         </nav>
