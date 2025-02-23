@@ -44,7 +44,15 @@
                                     @User.Identity.Name
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Security" asp-action="Logout">Logout</a>
+                                    <form
+                                        class="d-flex"
+                                        role="search"
+                                        asp-controller="Security"
+                                        asp-action="Logout"
+                                        method="post"
+                                    >
+                                        <button class="btn btn-link" type="submit">Logout</button>
+                                    </form>
                                 </li>
                             } else {
                                 <li class="nav-item">
