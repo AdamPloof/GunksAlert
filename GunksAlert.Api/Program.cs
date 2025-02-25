@@ -58,7 +58,7 @@ using (AsyncServiceScope scope = app.Services.CreateAsyncScope()) {
     await RoleSeeder.AssignAdmins(services, admins);
 }
 
-// Configure the HTTP request pipeline.
+// Seed the database
 if (app.Environment.IsDevelopment()) {
     using (AsyncServiceScope scope = app.Services.CreateAsyncScope()) {
         IServiceProvider services = scope.ServiceProvider;
@@ -67,11 +67,16 @@ if (app.Environment.IsDevelopment()) {
             "var",
             "weatherConditions.json"
         );
+
+        var dbContext = new GunksDbContext(
+            services.GetRequiredService<DbContextOptions<GunksDbContext>>()
+        );
         await DailyConditionSeeder.SeedAsync(
             conditionsPath,
-            new GunksDbContext(services.GetRequiredService<DbContextOptions<GunksDbContext>>()),
+            dbContext,
             app.Logger
         );
+        await ClimbableConditionSeeder.SeedAsync(dbContext);
     }
 } else {
     app.UseExceptionHandler("/Home/Error");
