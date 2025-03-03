@@ -5,7 +5,7 @@ using GunksAlert.Api.Models;
 namespace GunksAlert.Api.Data;
 
 /// <summary>
-/// Seed the database with a basic climbable conditions
+/// Seed the database with a standard AlertPeriod
 /// </summary>
 public static class AlertPeriodSeeder {
     public static async Task SeedAsync(GunksDbContext context) {

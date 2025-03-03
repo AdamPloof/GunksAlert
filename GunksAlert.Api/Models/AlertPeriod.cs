@@ -45,6 +45,11 @@ public class AlertPeriod {
     public int DaysOfWeek { get; private set; }
 
     // **Month operations**
+
+    /// <summary>
+    /// Convert bit mask of Months to list of month names
+    /// </summary>
+    /// <returns>List of month names</returns>
     public List<string> GetMonths() {
         string[] monthNames = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames;
         List<string> months = new List<string>();
@@ -59,6 +64,10 @@ public class AlertPeriod {
         return months;
     }
 
+    /// <summary>
+    /// Convert a list of month names to bit mask and set to Months 
+    /// </summary>
+    /// <param name="months"></param>
     public void SetMonths(List<string> months) {
         string[] monthNames = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames;
         HashSet<string> monthSet = new HashSet<string>(months);
@@ -94,6 +103,11 @@ public class AlertPeriod {
     }
 
     // **DaysOfWeek operations**
+
+    /// <summary>
+    /// Convert bit mask of DaysOfTheWeek to list of day names
+    /// </summary>
+    /// <returns>List of day names</returns>
     public List<string> GetDaysOfWeek() {
         string[] dayNames = CultureInfo.CurrentCulture.DateTimeFormat.DayNames;
         List<string> days = new List<string>();
@@ -108,6 +122,10 @@ public class AlertPeriod {
         return days;
     }
 
+    /// <summary>
+    /// Convert a list of day names to bit mask and set to DaysOfWeek 
+    /// </summary>
+    /// <param name="days"></param>
     public void SetDaysOfWeek(List<string> days) {
         string[] dayNames = CultureInfo.CurrentCulture.DateTimeFormat.DayNames;
         HashSet<string> daySet = new HashSet<string>(days);

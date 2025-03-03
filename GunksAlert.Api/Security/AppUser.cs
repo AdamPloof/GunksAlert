@@ -8,5 +8,22 @@ namespace GunksAlert.Api.Security;
 /// The User class for the app
 /// </summary>
 public class AppUser : IdentityUser {
-    public List<AlertCriteria> Criterias { get; } = new List<AlertCriteria>();
+    private List<AlertCriteria> _criterias = new List<AlertCriteria>();
+    
+    public IReadOnlyCollection<AlertCriteria> Criterias {
+        get => _criterias.AsReadOnly();
+        private set {
+            _criterias = value?.ToList() ?? new List<AlertCriteria>();
+        }
+    }
+
+    public void AddCriteria(AlertCriteria criteria) {
+        if (!_criterias.Contains(criteria)) {
+            _criterias.Add(criteria);
+        }
+    }
+
+    public void RemoveCriteria(AlertCriteria criteria) {
+        _criterias.Remove(criteria);
+    }
 }

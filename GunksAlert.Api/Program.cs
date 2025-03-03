@@ -78,6 +78,7 @@ if (app.Environment.IsDevelopment()) {
         );
         await ClimbableConditionSeeder.SeedAsync(dbContext);
         await AlertPeriodSeeder.SeedAsync(dbContext);
+        await AlertCriteriaSeeder.SeedAsync(dbContext);
     }
 } else {
     app.UseExceptionHandler("/Home/Error");
