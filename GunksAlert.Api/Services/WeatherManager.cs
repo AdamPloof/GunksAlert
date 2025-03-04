@@ -36,9 +36,7 @@ public class WeatherManager {
     public async Task RefreshWeather(Crag crag) {
         await GetMostRecentForecast(crag);
         await FillHistory(crag);
-
-        // TODO: clear dups should also accept a crag and only remove dups for that crag
-        await ClearDuplicates();
+        await ClearDuplicates(crag.Id);
     }
 
     /// <summary>
@@ -112,8 +110,8 @@ public class WeatherManager {
     /// forecast rows (for the same date). The most recent row of the duplicate
     /// will be preserved.
     /// </summary>
-    private async Task ClearDuplicates() {
-        string dedupQuery = $"CALL {ClearDuplicatesProcedure}()";
+    private async Task ClearDuplicates(int cragId) {
+        string dedupQuery = $"CALL {ClearDuplicatesProcedure}({cragId})";
         await _context.Database.ExecuteSqlRawAsync(dedupQuery);
     }
 }

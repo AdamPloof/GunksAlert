@@ -13,7 +13,7 @@ public class AlertSender {
         _logger = logger;
     }
 
-    public void SendAlert(AppUser user, ClimbabilityReport report) {
-        _logger.LogDebug($"Alert sent for {user.UserName}", report);
+    public void SendAlert(AppUser user, string msg) {
+        _logger.LogDebug($"${user.UserName}: {msg}");
     }
 }

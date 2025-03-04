@@ -17,6 +17,7 @@ public class GunksDbContext : IdentityDbContext<AppUser> {
     public DbSet<WeatherHistory> WeatherHistories { get; set; } = null!;
     public DbSet<DailyCondition> DailyConditions { get; set; } = null!;
     public DbSet<ClimbableConditions> ClimbableConditions { get; set; } = null!;
+    public DbSet<Alert> Alerts { get; set; } = null!;
     public DbSet<AlertPeriod> AlertPeriods { get; set; } = null!;
     public DbSet<AlertCriteria> AlertCriterias { get; set; } = null!;
     public DbSet<ClimbabilityReport> ClimbabilityReports { get; set; } = null!;
@@ -31,6 +32,7 @@ public class GunksDbContext : IdentityDbContext<AppUser> {
         modelBuilder.Entity<WeatherHistory>().ToTable("WeatherHistory");
         modelBuilder.Entity<DailyCondition>().ToTable("DailyCondition");
         modelBuilder.Entity<ClimbableConditions>().ToTable("ClimbableConditions");
+        modelBuilder.Entity<Alert>().ToTable("Alert");
         modelBuilder.Entity<AlertPeriod>().ToTable("AlertPeriod");
         modelBuilder.Entity<AlertCriteria>().ToTable("AlertCriteria");
         modelBuilder.Entity<ClimbabilityReport>().ToTable("ClimbabilityReport");

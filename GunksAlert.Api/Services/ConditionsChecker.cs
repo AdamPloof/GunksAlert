@@ -3,10 +3,10 @@ using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 using GunksAlert.Api.Models;
 using GunksAlert.Api.Data;
-using Microsoft.AspNetCore.Mvc;
 
 namespace GunksAlert.Api.Services;
 
