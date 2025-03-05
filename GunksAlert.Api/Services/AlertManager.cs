@@ -95,10 +95,13 @@ public class AlertManager {
 
     public List<Alert> GetAlerts(DateOnly targetDate, Crag crag) {
         List<Alert> alerts = [];
-        string dayName = targetDate.DayOfWeek.ToString();
-        IQueryable<AlertCriteria> criterias = _context.AlertCriterias.Where(
-             // TODO: check actual days of week and check months too
-            c => c.AlertPeriod.DaysOfWeek > 0 && c.CragId == crag.Id
+        int dayBit = 1 << (int)targetDate.DayOfWeek;
+        int monthBit = 1 << targetDate.Month - 1;
+
+        IQueryable<AlertCriteria> criterias = _context.AlertCriterias.Where(c => 
+                c.CragId == crag.Id
+                && (c.AlertPeriod.DaysOfWeek & dayBit) != 0
+                && (c.AlertPeriod.Months & monthBit) != 0
         );
 
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
