@@ -67,69 +67,38 @@ public class AlertManager {
         _sender = sender;
     }
 
-    public void ProcessAlerts() {
-        Dictionary<AppUser, AlertSet> alertQueue = GetAlertQueue();
-        foreach (KeyValuePair<AppUser, AlertSet> entry in alertQueue) {
-            SendAlerts(entry.Key, entry.Value);
+    public void ProcessAlerts(Crag crag) {
+        Dictionary<AppUser, List<Alert>> alertsByUser = GetAlertsByUser(crag);
+        foreach (KeyValuePair<AppUser, List<Alert>> entry in alertsByUser) {
+            _sender.SendAlerts(entry.Key, entry.Value);
         }
     }
 
-    /// <summary>
-    /// Get a dictionary of users and the days that require a notification and days that
-    /// require a cancelled notifcation.
-    /// </summary>
-    /// <returns></returns>
-    public Dictionary<AppUser, AlertSet> GetAlertQueue() {
-        List<AlertReport> reports = GetAlertReports();
-        Dictionary<AppUser, AlertSet> alertQueue = [];
-        foreach (AlertReport report in reports) {
-            // Rather than notifying each user for every day separately, group notifications
-            // can cancellations first so that we can send a single message with all dates.
-            foreach (AppUser user in report.UsersToNotify) {
-                if (!AlertRequired(user, report.TargetDate)) {
-                    continue;
-                }
-
-                if (!alertQueue.ContainsKey(user)) {
-                    alertQueue.Add(user, new AlertSet() {User = user});
-                }
-
-                alertQueue[user].NotifyDays.Add(report.TargetDate);
-            }
-
-            foreach (AppUser user in report.UsersToCancelNotify) {
-                if (!CancelAlertRequired(user, report.TargetDate)) {
-                    continue;
-                }
-
-                if (!alertQueue.ContainsKey(user)) {
-                    alertQueue.Add(user, new AlertSet() {User = user});
-                }
-
-                alertQueue[user].CancelNotifyDays.Add(report.TargetDate);
-            }
-        }
-
-        return alertQueue;
-    }
-
-    public List<AlertReport> GetAlertReports() {
-        List<AlertReport> reports = [];
+    public Dictionary<AppUser, List<Alert>> GetAlertsByUser(Crag crag) {
+        Dictionary<AppUser, List<Alert>> userAlerts = [];
         DateOnly targetDate = DateOnly.FromDateTime(DateTime.Today).AddDays(1);
         for (int i = 0; i > 7; i++) {
-            reports.Add(GetNotificationReport(targetDate));
+            List<Alert> alerts = GetAlerts(targetDate, crag);
+            foreach (Alert alert in alerts) {
+                if (!userAlerts.ContainsKey(alert.User)) {
+                    userAlerts.Add(alert.User, new List<Alert>());
+                }
+
+                userAlerts[alert.User].Add(alert);
+            }
+
             targetDate = targetDate.AddDays(1);
         }
 
-        return reports;
+        return userAlerts;
     }
 
-    public AlertReport GetNotificationReport(DateOnly targetDate) {
-        AlertReport alerts = new AlertReport(targetDate);
+    public List<Alert> GetAlerts(DateOnly targetDate, Crag crag) {
+        List<Alert> alerts = [];
         string dayName = targetDate.DayOfWeek.ToString();
         IQueryable<AlertCriteria> criterias = _context.AlertCriterias.Where(
              // TODO: check actual days of week and check months too
-            c => c.AlertPeriod.DaysOfWeek > 0
+            c => c.AlertPeriod.DaysOfWeek > 0 && c.CragId == crag.Id
         );
 
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
@@ -143,43 +112,30 @@ public class AlertManager {
             );
 
             if (report.IsClimbable()) {
-                criteria.AppUsers.ForEach(u => alerts.UsersToNotify.Add(u));
+                criteria.AppUsers.ForEach(u => {
+                    if (AlertRequired(u, targetDate)) {
+                        alerts.Add(new Alert(u) {
+                            CragId = crag.Id,
+                            ForecastDate = targetDate,
+                            SentOn = today
+                        });
+                    }
+                });
             } else {
-                criteria.AppUsers.ForEach(u => alerts.UsersToCancelNotify.Add(u));
+                criteria.AppUsers.ForEach(u => {
+                    if (CancelAlertRequired(u, targetDate)) {
+                        alerts.Add(new Alert(u) {
+                            CragId = crag.Id,
+                            ForecastDate = targetDate,
+                            SentOn = today,
+                            Canceled = false
+                        });
+                    }
+                });
             }
         }
 
         return alerts;
-    }
-
-    public void SendAlerts(AppUser user, AlertSet alerts) {
-        int notifyCount = alerts.NotifyDays.Count();
-        int cancelCount = alerts.CancelNotifyDays.Count();
-        if (notifyCount == 0 && cancelCount == 0) {
-            // not notifications/cancellations to send
-            return;
-        }
-
-        StringBuilder msg = new StringBuilder();
-        if (notifyCount > 0) {
-            // TODO: store crag in the alert so we know what crag to let people know is going to be good
-            msg.Append("Looks like some good weather coming to {TODO: CRAG NAME}.");
-            msg.Append("The following days will be climbable:\n");
-            foreach (DateOnly d in alerts.NotifyDays) {
-                msg.Append($"- {d.ToString("M/d/yyyy")}\n");
-            }
-        }
-
-        if (cancelCount > 0) {
-            // TODO: store crag in the alert so we know what crag to let people know is going to be good
-            msg.Append("Looks like the weather changed for the worse at {TODO: CRAG NAME}.");
-            msg.Append("The following days will be NOT be climbable:\n");
-            foreach (DateOnly d in alerts.CancelNotifyDays) {
-                msg.Append($"- {d.ToString("M/d/yyyy")}\n");
-            }
-        }
-
-        _sender.SendAlert(user, msg.ToString());
     }
 
     /// <summary>
