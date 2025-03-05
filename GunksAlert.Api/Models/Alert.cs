@@ -11,12 +11,15 @@ namespace GunksAlert.Api.Models;
 /// A record for an alert that has been sent
 /// </summary>
 public class Alert {
-    public Alert(AppUser user) {
-        User = user;
-    }
+    [Key]
+    public int Id { get; private set; }
+
+    [ForeignKey("User")]
+    [NonZero]
+    public required string UserId { get; set; }
 
     [Required]
-    public AppUser User { get; private set; }
+    public required AppUser User { get; set; }
 
     [Required]
     public DateOnly SentOn { get; set; }

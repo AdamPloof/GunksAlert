@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
+
 using GunksAlert.Api.Models;
 
 namespace GunksAlert.Api.Security;

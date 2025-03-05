@@ -117,7 +117,9 @@ public class AlertManager {
             if (report.IsClimbable()) {
                 criteria.AppUsers.ForEach(u => {
                     if (AlertRequired(u, targetDate)) {
-                        alerts.Add(new Alert(u) {
+                        alerts.Add(new Alert() {
+                            User = u,
+                            UserId = u.Id,
                             CragId = crag.Id,
                             ForecastDate = targetDate,
                             SentOn = today
@@ -127,8 +129,10 @@ public class AlertManager {
             } else {
                 criteria.AppUsers.ForEach(u => {
                     if (CancelAlertRequired(u, targetDate)) {
-                        alerts.Add(new Alert(u) {
+                        alerts.Add(new Alert() {
                             CragId = crag.Id,
+                            User = u,
+                            UserId = u.Id,
                             ForecastDate = targetDate,
                             SentOn = today,
                             Canceled = false
