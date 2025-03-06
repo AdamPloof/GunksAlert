@@ -121,6 +121,7 @@ public class AlertManager {
                             User = u,
                             UserId = u.Id,
                             CragId = crag.Id,
+                            Crag = crag,
                             ForecastDate = targetDate,
                             SentOn = today
                         });
@@ -130,9 +131,10 @@ public class AlertManager {
                 criteria.AppUsers.ForEach(u => {
                     if (CancelAlertRequired(u, targetDate)) {
                         alerts.Add(new Alert() {
-                            CragId = crag.Id,
                             User = u,
                             UserId = u.Id,
+                            CragId = crag.Id,
+                            Crag = crag,
                             ForecastDate = targetDate,
                             SentOn = today,
                             Canceled = false

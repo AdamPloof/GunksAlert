@@ -43,6 +43,8 @@ builder.Services.AddScoped<ForecastManager, ForecastManager>();
 builder.Services.AddScoped<WeatherHistoryManager, WeatherHistoryManager>();
 builder.Services.AddScoped<WeatherManager, WeatherManager>();
 builder.Services.AddScoped<ConditionsChecker, ConditionsChecker>();
+builder.Services.AddScoped<AlertSender, AlertSender>();
+builder.Services.AddScoped<AlertManager, AlertManager>();
 builder.Services.AddScoped<IAuthenticationProvider, PasswordAuthenticationProvider>();
 
 var app = builder.Build();

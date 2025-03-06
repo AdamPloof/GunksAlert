@@ -11,6 +11,23 @@ namespace GunksAlert.Cli.Services;
 /// </summary>
 public static class WeatherManager {
     /// <summary>
+    /// Refresh all weather data. Get most recent forecasts and weather
+    /// history remove duplicate histories, ensure there are a minimum of
+    /// 90 days of weather history.
+    /// 
+    /// TODO: take in crag name/ID
+    /// </summary>
+    /// <param name="date"></param>
+    /// <returns>true if the request was successful, otherwise false</returns>
+    public static async Task<bool> RefreshWeatherData() {
+        string endpoint = "api/crag/refresh-weather";
+        IApiResponse response = await ApiBridge.CallApi(HttpMethod.Get, endpoint);
+        LogResponse(response);
+
+        return response is ApiSuccessResponse;
+    }
+
+    /// <summary>
     /// Update weather history for a specific date
     /// </summary>
     /// <param name="date"></param>

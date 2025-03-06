@@ -11,16 +11,33 @@ namespace GunksAlert.Api.Controllers;
 public class AlertController : Controller {
     private readonly GunksDbContext _context;
     private readonly ConditionsChecker _conditionsChecker;
+    private readonly AlertManager _alertManager;
     private readonly ILogger<AlertController> _logger;
 
     public AlertController(
         GunksDbContext context,
         ConditionsChecker conditionsChecker,
+        AlertManager alertManager,
         ILogger<AlertController> logger
     ) {
         _context = context;
         _conditionsChecker = conditionsChecker;
+        _alertManager = alertManager;
         _logger = logger;
+    }
+
+    [Route("alert/process-alerts/{cragId}")]
+    public IActionResult ProcessAlerts(int cragId) {
+        Crag? crag = _context.Crags.Find(cragId);
+        if (crag == null) {
+            ViewData["status"] = "Not processed";
+            return View();
+        }
+
+        _alertManager.ProcessAlerts(crag);
+        ViewData["status"] = "Processed";
+        
+        return View();
     }
 
     [Route("/alert/check-conditions/{cragId}", Name = "CheckConditions")]

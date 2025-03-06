@@ -32,6 +32,8 @@ public class Alert {
     [Required]
     public int CragId { get; set; }
 
+    public required Crag Crag { get; set; }
+
     [Required]
     public bool Canceled { get; set; } = false;
 }

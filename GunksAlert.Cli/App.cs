@@ -63,6 +63,13 @@ public class App {
                 ActionFunc = endDate => { StoreEndDate(endDate); return Task.CompletedTask; }
             },
             new AppAction() {
+                ShortOpt = "-r",
+                LongOpt ="--refresh-weather",
+                ValueRequired = false,
+                ShouldContinue = false,
+                ActionFunc = HandleRefreshWeather
+            },
+            new AppAction() {
                 ShortOpt = "-u",
                 LongOpt ="--update",
                 ValueRequired = true,
@@ -249,6 +256,16 @@ public class App {
         }
     }
 
+    private async Task HandleRefreshWeather(string? _) {
+        Console.WriteLine("Refreshing weather data...");
+        bool isSuccess = await WeatherManager.RefreshWeatherData();
+         if (isSuccess) {
+            Console.WriteLine("Update successful");
+         } else {
+            Console.WriteLine("Update failed. See logs for details");
+         }        
+    }
+
     private async Task HandleUpdate(string? model) {
         if (model == null) {
             Console.WriteLine("Most provide a model to update. Null given");
@@ -328,6 +345,10 @@ public class App {
 
             Options:
             -h, --help              Show this help message and exit.
+
+            -r, --refresh-weather   Refresh all weather records. Get most recent forecasts and weather
+                                    history remove duplicate histories, ensure there are a minimum of
+                                    90 days of weather history.
 
             -d, --date <DATE>       Specify the date for operations like updating weather history
                                     or clearing weather history. The date must be in the format

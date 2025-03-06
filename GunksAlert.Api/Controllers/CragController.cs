@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using GunksAlert.Api.Data;
 using GunksAlert.Api.Services;
 using GunksAlert.Api.Models;
+using GunksAlert.Api.Http;
 
 namespace GunksAlert.Api.Controllers;
 
@@ -37,8 +38,18 @@ public class CragController : Controller {
     [AllowAnonymous]
     public async  Task<IActionResult> RefreshWeatherData() {
         Crag gunks = _context.Crags.Where(c => c.Id == 1).First();
-        await _weather.RefreshWeather(gunks);
+        try {
+            await _weather.RefreshWeather(gunks);
+            ApiResponseContent content = new ApiResponseContent() {
+                Status = ApiResponseContent.ResponseStatus.Success,
+                Action = "Refresh-Weather",
+                Model = "All",
+                Data = new int[0]
+            };
 
-        return View();
+            return Ok(content);
+        } catch (Exception e) {
+            return Problem(e.Message, null, 500);
+        }
     }
 }
