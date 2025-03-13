@@ -56,21 +56,28 @@ public class AlertManager {
     private GunksDbContext _context;
     private ConditionsChecker _conditionsChecker;
     private AlertSender _sender;
+    private ILogger _logger;
 
     public AlertManager(
         GunksDbContext context,
         ConditionsChecker conditionsChecker,
-        AlertSender sender
+        AlertSender sender,
+        ILogger<AlertManager> logger
     ) {
         _context = context;
         _conditionsChecker = conditionsChecker;
         _sender = sender;
+        _logger = logger;
     }
 
     public void ProcessAlerts(Crag crag) {
+        _logger.LogDebug("Processing alerts");
         Dictionary<AppUser, List<Alert>> alertsByUser = GetAlertsByUser(crag);
         foreach (KeyValuePair<AppUser, List<Alert>> entry in alertsByUser) {
             _sender.SendAlerts(entry.Key, entry.Value);
+            _logger.LogDebug(
+                $"Alert sent for: {entry.Key.UserName} for {entry.Value[0].ForecastDate.ToString("yyyy-mm-dd")}"
+            );
         }
     }
 
@@ -115,6 +122,7 @@ public class AlertManager {
             );
 
             if (report.IsClimbable()) {
+                _logger.LogDebug($"{today.ToString("yyyy-mm-dd")} is climbable, preparing alerts.");
                 criteria.AppUsers.ForEach(u => {
                     if (AlertRequired(u, targetDate)) {
                         alerts.Add(new Alert() {
@@ -128,6 +136,7 @@ public class AlertManager {
                     }
                 });
             } else {
+                _logger.LogDebug($"{today.ToString("yyyy-mm-dd")} is not climbable, no alerts will be sent.");
                 criteria.AppUsers.ForEach(u => {
                     if (CancelAlertRequired(u, targetDate)) {
                         alerts.Add(new Alert() {
