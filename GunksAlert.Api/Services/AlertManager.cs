@@ -84,7 +84,7 @@ public class AlertManager {
     public Dictionary<AppUser, List<Alert>> GetAlertsByUser(Crag crag) {
         Dictionary<AppUser, List<Alert>> userAlerts = [];
         DateOnly targetDate = DateOnly.FromDateTime(DateTime.Today).AddDays(1);
-        for (int i = 0; i > 7; i++) {
+        for (int i = 0; i < 7; i++) {
             List<Alert> alerts = GetAlerts(targetDate, crag);
             foreach (Alert alert in alerts) {
                 if (!userAlerts.ContainsKey(alert.User)) {
@@ -105,16 +105,19 @@ public class AlertManager {
         int dayBit = 1 << (int)targetDate.DayOfWeek;
         int monthBit = 1 << targetDate.Month - 1;
 
-        IQueryable<AlertCriteria> criterias = _context.AlertCriterias.Where(c => 
+        List<AlertCriteria> criterias = _context.AlertCriterias.Where(c => 
                 c.CragId == crag.Id
                 && (c.AlertPeriod.DaysOfWeek & dayBit) != 0
                 && (c.AlertPeriod.Months & monthBit) != 0
-        );
+        ).ToList();
 
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
         foreach (AlertCriteria criteria in criterias) {
             // TODO: an efficiency improvement here would be to sort criteria by strictness ASC and
             // then stop checking conditions once a less strict one has failed
+            _context.Entry(criteria)
+                .Reference(c => c.ClimbableConditions)
+                .Load();
             ClimbabilityReport report = _conditionsChecker.ConditionsReport(
                 criteria.ClimbableConditions,
                 today,
@@ -122,7 +125,7 @@ public class AlertManager {
             );
 
             if (report.IsClimbable()) {
-                _logger.LogDebug($"{today.ToString("yyyy-mm-dd")} is climbable, preparing alerts.");
+                _logger.LogDebug($"{targetDate.ToString("yyyy-MM-dd")} is climbable, preparing alerts.");
                 criteria.AppUsers.ForEach(u => {
                     if (AlertRequired(u, targetDate)) {
                         alerts.Add(new Alert() {
@@ -136,7 +139,7 @@ public class AlertManager {
                     }
                 });
             } else {
-                _logger.LogDebug($"{today.ToString("yyyy-mm-dd")} is not climbable, no alerts will be sent.");
+                _logger.LogDebug($"{targetDate.ToString("yyyy-MM-dd")} is not climbable, no alerts will be sent.");
                 criteria.AppUsers.ForEach(u => {
                     if (CancelAlertRequired(u, targetDate)) {
                         alerts.Add(new Alert() {

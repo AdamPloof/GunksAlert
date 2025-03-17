@@ -41,13 +41,12 @@ public class ConditionsChecker {
             TimeSpan.Zero
         );
         DateTimeOffset targetDt = new DateTimeOffset(
-            targetDate.ToDateTime(new TimeOnly(0, 0)),
+            targetDate.ToDateTime(new TimeOnly(23, 59)),
             TimeSpan.Zero
         );
 
-        // TODO: this is returning an empty list??
-        List<Forecast> upcomingWeather = _context.Forecasts.Where(
-            f => f.Date >= currentDt && f.Date.Date <= targetDt.Date
+        List<Forecast> upcomingWeather = _context.Forecasts.Where(f =>
+            f.Date.Date >= currentDt.Date && f.Date.Date <= targetDt.Date
         ).ToList();
         DateOnly startHistory = currentDate.AddDays(-90);
         List<WeatherHistory> recentWeather = _context.WeatherHistories.Where(
@@ -87,7 +86,9 @@ public class ConditionsChecker {
             targetDate.ToDateTime(new TimeOnly(0, 0)),
             TimeSpan.Zero
         );
-        Forecast targetForecast = upcomingWeather.Where(f => f.Date.Date == dt.Date).First();
+        Forecast targetForecast = upcomingWeather.Where(f =>
+            f.Date.Date == dt.Date
+        ).First();
         ForecastLooksGood(targetForecast, conditions, ref summary);
         summary.ChanceDry = CragWillBeDry(recentWeather, upcomingWeather, currentDate, targetDate);
 

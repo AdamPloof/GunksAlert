@@ -33,6 +33,21 @@ try {
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
+        .WriteTo.Logger(lc => lc
+            .Filter.ByIncludingOnly(evt =>
+                evt.Properties.TryGetValue("SourceContext", out var sourceContext)
+                && sourceContext.ToString().Contains("Microsoft.AspNetCore")
+            )
+            .WriteTo.Console()
+        )
+        .WriteTo.Logger(lc => lc
+            .Filter.ByExcluding(evt =>
+                evt.Properties.TryGetValue("SourceContext", out var sourceContext)
+                && sourceContext.ToString().Contains("Microsoft.AspNetCore")
+            )
+            // TODO: change log file name to reflect environment
+            .WriteTo.File("./logs/dev_.log", rollingInterval: RollingInterval.Day)
+        )
     );
 
     // Controllers
