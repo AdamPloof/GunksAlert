@@ -31,7 +31,8 @@ public class ConditionsChecker {
     /// <param name="currentDate"></param>
     /// <param name="targetDate"></param>
     /// <returns></returns>
-    public ClimbabilityReport ConditionsReport(
+    public ConditionsReport CheckConditions(
+        Crag crag,
         ClimbableConditions conditions,
         DateOnly currentDate,
         DateOnly targetDate
@@ -53,34 +54,9 @@ public class ConditionsChecker {
             h => h.Date >= startHistory
         ).ToList();
 
-        return CheckConditions(
-            recentWeather,
-            upcomingWeather,
-            conditions,
-            currentDate,
-            targetDate
-        );
-    }
-
-    /// <summary>
-    /// Gathers all the information about what makes for a climbable day.
-    /// </summary>
-    /// <param name="recentWeather"></param>
-    /// <param name="upcomingWeather"></param>
-    /// <param name="conditions"></param>
-    /// <param name="currentDate"></param>
-    /// <param name="targetDate"></param>
-    /// <returns></returns>
-    public static ClimbabilityReport CheckConditions(
-        List<WeatherHistory> recentWeather,
-        List<Forecast> upcomingWeather,
-        ClimbableConditions conditions,
-        DateOnly currentDate,
-        DateOnly targetDate
-    ) {
-        ClimbabilityReport summary = new() {
+        ConditionsReport report = new ConditionsReport() {
             Date = targetDate,
-            CragId = 1
+            CragId = crag.Id
         };
         DateTimeOffset dt = new DateTimeOffset(
             targetDate.ToDateTime(new TimeOnly(0, 0)),
@@ -89,34 +65,18 @@ public class ConditionsChecker {
         Forecast targetForecast = upcomingWeather.Where(f =>
             f.Date.Date == dt.Date
         ).First();
-        ForecastLooksGood(targetForecast, conditions, ref summary);
-        summary.ChanceDry = CragWillBeDry(recentWeather, upcomingWeather, currentDate, targetDate);
 
-        return summary;
-    }
+        // TODO: could probably get components of dryness (snowpack, rain preceding days, etc.) separately
+        // and pass into ChanceDry rather than having a side effect of modifying the report.
+        report.ChanceDry = ChanceDry(recentWeather, upcomingWeather, currentDate, targetDate, ref report);
+        report.TempFeelsLike = targetForecast.TempFeelsLikeDay;
+        report.WindSpeed = targetForecast.WindSpeed;
+        report.WindDegree = targetForecast.WindDegree;
+        report.Humidity = targetForecast.Humidity;
+        report.TempMin = conditions.TempMin;
+        report.TempMax = conditions.TempMax;
 
-    public static void ForecastLooksGood(
-        Forecast forecast,
-        ClimbableConditions conditions,
-        ref ClimbabilityReport summary
-    ) {
-        double feelsLike = forecast.TempFeelsLikeDay;
-        if (feelsLike >= conditions.TempMin && feelsLike <= conditions.TempMax) {
-            summary.TempGood = true;
-            summary.WindGood = true;
-        } else {
-            summary.TempGood = false;
-            if (feelsLike < conditions.TempMin && forecast.TempHigh >= conditions.TempMin) {
-                // Wind was a factor
-                summary.WindGood = false;
-            } else {
-                summary.WindGood = true;
-            }
-        }
-
-        // Not really doing much with clouds or humidity right now
-        summary.CloudsGood = true;
-        summary.HumidityGood = true;
+        return report;
     }
 
     /// <summary>
@@ -149,38 +109,22 @@ public class ConditionsChecker {
     /// </remarks
     /// <param name="recentWeather"></param>
     /// <param name="upcomingWeather"></param>
+    /// <param name="currentDate">Today or the day to consider as today</param>
     /// <param name="targetDate">Assumed to always be later than today</param>
+    /// <param name="report">A ConditionsReport to update the precipitation subtotals of</param>
     /// <returns>
     /// Likelyhood of being dry, between 0-1 with 1 being definitely dry and 0 being definitely wet
     /// </returns>
-    public static double CragWillBeDry(
-        List<WeatherHistory> recentWeather,
-        List<Forecast> upcomingWeather,
-        DateOnly currentDate,
-        DateOnly targetDate
-    ) {
-        if (targetDate < currentDate) {
-            throw new ArgumentException("Target date is before current date");
-        }
-        
-        double chanceDryDayOf = ChanceDry(recentWeather, upcomingWeather, currentDate, targetDate);
-        Forecast targetForecast = upcomingWeather.Where(
-            f => DateOnly.FromDateTime(f.Date.Date) == targetDate
-        ).First();
-        // Amount of precipitation day of increases the significance of the chance of precipitation
-        double precipDayOfSignificance = 1.0 + ((targetForecast.Rain + targetForecast.Snow) / 10.0);
-        double chanceDry =  chanceDryDayOf - (targetForecast.Pop * precipDayOfSignificance);
-
-        return chanceDry > 0.0 ? chanceDry : 0.0;
-    }
-
     public static double ChanceDry(
         List<WeatherHistory> recentWeather,
         List<Forecast> upcomingWeather,
         DateOnly currentDate,
-        DateOnly targetDate
+        DateOnly targetDate,
+        ref ConditionsReport report
     ) {
-        if (recentWeather.Count() < 90) {
+        if (targetDate < currentDate) {
+            throw new ArgumentException("Target date is before current date");
+        } else if (recentWeather.Count() < 90) {
             throw new ArgumentException(
                 "Predicting crag dryness requires at least 90 days of weather history"
             );
@@ -192,6 +136,7 @@ public class ConditionsChecker {
 
         double snowpack = EstimatedSnowpack(recentWeather);
         chanceDry -= snowpack * DryRate;
+        report.EstimatedSnowpack = snowpack;
         
         double precipitationDayBefore = 0.0;
         if (targetDate == currentDate) {
@@ -208,6 +153,16 @@ public class ConditionsChecker {
 
         // Additional penality if the rain happens the day before
         chanceDry -= precipitationDayBefore * DryRate;
+        chanceDry = chanceDry > 0.0 ? chanceDry : 0.0;
+        report.PreciptationDayBefore = precipitationDayBefore;
+
+        Forecast targetForecast = upcomingWeather.Where(
+            f => DateOnly.FromDateTime(f.Date.Date) == targetDate
+        ).First();
+        // Amount of precipitation day of increases the significance of the chance of precipitation
+        double precipDayOfSignificance = 1.0 + ((targetForecast.Rain + targetForecast.Snow) / 10.0);
+        chanceDry -=  targetForecast.Pop * precipDayOfSignificance;
+        report.PreciptationDayOf = targetForecast.Rain + targetForecast.Snow;
 
         return chanceDry > 0.0 ? chanceDry : 0.0;
     }

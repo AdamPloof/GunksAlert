@@ -66,7 +66,8 @@ public class AlertController : Controller {
             Snow = 0.0
         };
         DateTimeOffset weekend = today.AddDays(5);
-        ClimbabilityReport report = _conditionsChecker.ConditionsReport(
+        ConditionsReport report = _conditionsChecker.CheckConditions(
+            crag,
             conditions,
             DateOnly.FromDateTime(today.DateTime),
             DateOnly.FromDateTime(weekend.DateTime)

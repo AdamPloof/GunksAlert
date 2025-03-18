@@ -11,7 +11,10 @@ namespace GunksAlert.Api.Models;
 /// <summary>
 /// Stores details behind a why a day is considered climbable or not.
 /// </summary>
-public class ClimbabilityReport {
+/// <remarks>
+/// Useful for debugging why days did or did not trigger an alert.
+/// </remarks>
+public class ConditionsReport {
     public const double AcceptableDryness = 0.97;
 
     [Key]
@@ -29,36 +32,44 @@ public class ClimbabilityReport {
     public DateOnly Date { get; set; }
 
     [Required]
-    [JsonPropertyName("temp_good")]
-    public bool TempGood { get; set; }
+    public double TempFeelsLike { get; set; }
 
     [Required]
-    [JsonPropertyName("wind_good")]
-    public bool WindGood { get; set; }
+    public double TempMin { get; set; }
 
     [Required]
-    [JsonPropertyName("clouds_good")]
-    public bool CloudsGood { get; set; }
+    public double TempMax { get; set; }
 
     [Required]
-    [JsonPropertyName("humidity_good")]
-    public bool HumidityGood { get; set; }
+    public double WindSpeed { get; set; }
 
     [Required]
-    [JsonPropertyName("chance_dry")]
+    [Range(0, 360)]
+    public int WindDegree { get; set; }
+
+    [Required]
+    [Range(0, 100)]
+    public int Clouds { get; set; }
+
+    [Required]
+    [Range(0, 100)]
+    public int Humidity { get; set; }
+
+    [Required]
+    public double EstimatedSnowpack { get; set; }
+
+    [Required]
+    public double PreciptationDayBefore { get; set; }
+
+    [Required]
+    public double PreciptationDayOf { get; set; }
+
+    [Required]
     public double ChanceDry { get; set; }
-
-    public string Summary() {
-        string dateStr = Date.ToString("yyyy-MM-dd");
-        string tempGood = TempGood ? "temperature acceptable" : "temperature not acceptable";
-        string windGood = WindGood ? "wind acceptable" : "wind not acceptable";
-        
-        return $"{dateStr}: {tempGood}, {windGood}";
-    }
 
     public bool IsClimbable() {
         bool isClimbable = true;
-        if (!TempGood) {
+        if (TempFeelsLike < TempMin || TempFeelsLike > TempMax) {
             isClimbable = false;
         }
 

@@ -14,8 +14,11 @@ public class ConditionsCheckerTests {
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<Forecast> forecasts = MakeForecasts(new DateOnly(2025, 4, 1), 10, 0.0, 0.0);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 1, 1), 90, 0.0, 0.0);
+        ConditionsReport _ = new ConditionsReport();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
+        Assert.True(
+            ConditionsChecker.ChanceDry(histories, forecasts, currentDate, targetDate, ref _) > 0.99
+        );
     }
 
     [Fact]
@@ -26,8 +29,12 @@ public class ConditionsCheckerTests {
         List<WeatherHistory> janHistory = MakeHistories(new DateOnly(2025, 1, 1), 31, 0.0, 6.0);
         List<WeatherHistory> febMarHistory = MakeHistories(new DateOnly(2025, 2, 1), 59, 0.0, 0.0);
         List<WeatherHistory> histories = janHistory.Concat(febMarHistory).ToList();
+        ConditionsReport _ = new ConditionsReport();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
+        Assert.True(
+            ConditionsChecker.ChanceDry(
+                histories, forecasts, currentDate, targetDate, ref _) > 0.99
+            );
     }
 
     [Fact]
@@ -38,8 +45,11 @@ public class ConditionsCheckerTests {
         List<WeatherHistory> janFebHistory = MakeHistories(new DateOnly(2025, 1, 1), 31, 2.0, 0.0);
         List<WeatherHistory> marHistory = MakeHistories(new DateOnly(2025, 2, 1), 59, 0.0, 0.0);
         List<WeatherHistory> histories = janFebHistory.Concat(marHistory).ToList();
+        ConditionsReport _ = new ConditionsReport();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
+        Assert.True(
+            ConditionsChecker.ChanceDry(histories, forecasts, currentDate, targetDate, ref _) > 0.99
+        );
     }
 
     [Fact]
@@ -50,8 +60,11 @@ public class ConditionsCheckerTests {
         List<WeatherHistory> janStart = MakeHistories(new DateOnly(2025, 1, 1), 2, 0.0, 24);
         List<WeatherHistory> restHistory = MakeHistories(new DateOnly(2025, 1, 3), 88, 0.0, 0.0);
         List<WeatherHistory> histories = janStart.Concat(restHistory).ToList();
+        ConditionsReport _ = new ConditionsReport();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
+        Assert.True(
+            ConditionsChecker.ChanceDry(histories, forecasts, currentDate, targetDate, ref _) > 0.99
+        );
     }
 
     [Fact]
@@ -62,8 +75,11 @@ public class ConditionsCheckerTests {
         List<Forecast> earlyWeek = MakeForecasts(new DateOnly(2025, 4, 1), 2, 0.5, 0.0);
         List<Forecast> restOfWeek = MakeForecasts(new DateOnly(2025, 4, 3), 8, 0.0, 0.0);
         List<Forecast> forecasts = earlyWeek.Concat(restOfWeek).ToList();
+        ConditionsReport _ = new ConditionsReport();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) > 0.99);
+        Assert.True(
+            ConditionsChecker.ChanceDry(histories, forecasts, currentDate, targetDate, ref _) > 0.99
+        );
     }
 
     [Fact]
@@ -74,8 +90,12 @@ public class ConditionsCheckerTests {
         List<Forecast> mostOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 9, 0.0, 0.0);
         List<Forecast> dayOf = MakeForecasts(new DateOnly(2025, 4, 10), 1, 1.0, 0.0);
         List<Forecast> forecasts = mostOfWeek.Concat(dayOf).ToList();
+        ConditionsReport _ = new ConditionsReport();
 
-        Assert.Equal(0.0, ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate));
+        Assert.Equal(
+            0.0,
+            ConditionsChecker.ChanceDry(histories, forecasts, currentDate, targetDate, ref _)
+        );
     }
 
     [Fact]
@@ -88,8 +108,11 @@ public class ConditionsCheckerTests {
         Forecast dayOf = MakeForecast(new DateOnly(2025, 4, 10), 0.0, 50.0, 45.0);
         List<Forecast> forecasts = beginningOfWeek.Concat(endOfWeek).ToList();
         forecasts.Add(dayOf);
+        ConditionsReport _ = new ConditionsReport();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) < 0.68);
+        Assert.True(
+            ConditionsChecker.ChanceDry(histories, forecasts, currentDate, targetDate, ref _) < 0.68
+        );
     }
 
     [Fact]
@@ -100,8 +123,11 @@ public class ConditionsCheckerTests {
         List<Forecast> mostOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 8, 0.0, 12.0);
         List<Forecast> twoDaysOf = MakeForecasts(new DateOnly(2025, 4, 9), 2, 0.0, 0.0);
         List<Forecast> forecasts = mostOfWeek.Concat(twoDaysOf).ToList();
+        ConditionsReport _ = new ConditionsReport();
 
-        Assert.True(ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate) < 0.3);
+        Assert.True(
+            ConditionsChecker.ChanceDry(histories, forecasts, currentDate, targetDate, ref _) < 0.3
+        );
     }
 
     [Fact]
@@ -111,8 +137,9 @@ public class ConditionsCheckerTests {
         List<Forecast> forecasts = MakeForecasts(new DateOnly(2025, 4, 1), 10, 0.0, 0.0);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 3, 1), 30, 0.0, 0.0);
 
+        ConditionsReport _ = new ConditionsReport();
         Assert.Throws<ArgumentException>(
-            () => ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate)
+            () => ConditionsChecker.ChanceDry(histories, forecasts, currentDate, targetDate, ref _)
         );
     }
 
@@ -123,8 +150,9 @@ public class ConditionsCheckerTests {
         List<Forecast> forecasts = MakeForecasts(new DateOnly(2023, 4, 1), 10, 0.0, 0.0);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2023, 1, 1), 90, 0.0, 0.0);
 
+        ConditionsReport _ = new ConditionsReport();
         Assert.Throws<ArgumentException>(
-            () => ConditionsChecker.CragWillBeDry(histories, forecasts, currentDate, targetDate)
+            () => ConditionsChecker.ChanceDry(histories, forecasts, currentDate, targetDate, ref _)
         );
     }
 

@@ -118,7 +118,8 @@ public class AlertManager {
             _context.Entry(criteria)
                 .Reference(c => c.ClimbableConditions)
                 .Load();
-            ClimbabilityReport report = _conditionsChecker.ConditionsReport(
+            ConditionsReport report = _conditionsChecker.CheckConditions(
+                criteria.Crag,
                 criteria.ClimbableConditions,
                 today,
                 targetDate

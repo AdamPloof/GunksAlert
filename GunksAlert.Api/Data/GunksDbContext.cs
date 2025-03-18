@@ -20,7 +20,7 @@ public class GunksDbContext : IdentityDbContext<AppUser> {
     public DbSet<Alert> Alerts { get; set; } = null!;
     public DbSet<AlertPeriod> AlertPeriods { get; set; } = null!;
     public DbSet<AlertCriteria> AlertCriterias { get; set; } = null!;
-    public DbSet<ClimbabilityReport> ClimbabilityReports { get; set; } = null!;
+    public DbSet<ConditionsReport> ConditionsReports { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
@@ -35,6 +35,6 @@ public class GunksDbContext : IdentityDbContext<AppUser> {
         modelBuilder.Entity<Alert>().ToTable("Alert");
         modelBuilder.Entity<AlertPeriod>().ToTable("AlertPeriod");
         modelBuilder.Entity<AlertCriteria>().ToTable("AlertCriteria");
-        modelBuilder.Entity<ClimbabilityReport>().ToTable("ClimbabilityReport");
+        modelBuilder.Entity<ConditionsReport>().ToTable("ConditionsReport");
     }
 }
