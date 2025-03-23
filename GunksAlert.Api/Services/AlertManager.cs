@@ -119,8 +119,6 @@ public class AlertManager {
                 targetDate
             );
             _context.ConditionsReports.Add(report);
-            _context.SaveChanges();
-
             if (report.IsClimbable()) {
                 _logger.LogDebug($"{targetDate.ToString("yyyy-MM-dd")} is climbable, preparing alerts.");
                 criteria.AppUsers.ForEach(u => {
@@ -152,6 +150,8 @@ public class AlertManager {
                 });
             }
         }
+
+        _context.SaveChanges();
 
         return alerts;
     }

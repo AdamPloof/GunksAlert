@@ -16,7 +16,7 @@ namespace GunksAlert.Api.Services;
 /// of climbable conditions.
 /// </summary>
 public class ConditionsChecker {
-    private static readonly double DryRate = 0.1;
+    private static readonly double DryRate = 0.01;
     private readonly GunksDbContext _context;
 
     public ConditionsChecker(GunksDbContext context) {
@@ -264,24 +264,34 @@ public class ConditionsChecker {
     public static double EstimatedSnowpack(List<WeatherHistory> seasonHistory) {
         double snowpack = 0.0;
         foreach (WeatherHistory weather in seasonHistory) {
-            double snowfall = 0.0;
-            if (weather.TempHigh < 35.6) {
-                // assume 10:1 snow-water ratio
-                snowfall = weather.Precipitation * 10;
-            } else if (weather.TempHigh < 41) {
-                // mix snow/rain
-                snowfall = (weather.Precipitation * 0.5) * 10;
-            } else {
-                snowfall = 0.0;
+            double snowToLiqudRatio;
+            switch (weather.TempHigh) {
+                case < 10:
+                    snowToLiqudRatio = 15.0;
+                    break;
+                case < 20:
+                    snowToLiqudRatio = 10.0;
+                    break;
+                case < 32:
+                    snowToLiqudRatio = 7.0;
+                    break;
+                case < 41:
+                    snowToLiqudRatio = 5.0;
+                    break;
+                default:
+                    snowToLiqudRatio = 0.0;
+                    break;
             }
 
+            double snowfall = weather.Precipitation * snowToLiqudRatio;
             double meltFactor = 0.0;
             if (weather.TempHigh > 32) {
-                // Base melt rate = 0.5mm melt per day for every degree above freezing
-                meltFactor = (weather.TempHigh - 32) * 0.5;
+                // Base melt rate = 2mm melt per day for every degree above freezing
+                meltFactor = (weather.TempHigh - 32) * 2;
                 meltFactor *= 1 - (weather.Clouds / 100); // more clouds, less melt
                 meltFactor *= 1 - (weather.Humidity / 100); // more humidity, less melt
                 meltFactor *= 1 + (weather.WindSpeed / 100); // more wind, more melt
+                meltFactor += weather.Precipitation * 10; // rain accelerates melt
             } else {
                 meltFactor = 0.0;
             }
@@ -289,6 +299,7 @@ public class ConditionsChecker {
             snowpack += snowfall;
             snowpack -= meltFactor;
             snowpack = snowpack < 0.0 ? 0.0 : snowpack;
+            snowpack *= 0.98; // daily compaction
         }
 
         return snowpack;

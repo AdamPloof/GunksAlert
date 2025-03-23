@@ -103,8 +103,8 @@ public class ConditionsCheckerTests {
         DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 1, 1), 90, 0.0, 0.0);
-        List<Forecast> beginningOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 6, 1.0, 0.0);
-        List<Forecast> endOfWeek = MakeForecasts(new DateOnly(2025, 4, 7), 3, 3.5, 0.0);
+        List<Forecast> beginningOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 6, 12.0, 0.0);
+        List<Forecast> endOfWeek = MakeForecasts(new DateOnly(2025, 4, 7), 3, 32.5, 0.0);
         Forecast dayOf = MakeForecast(new DateOnly(2025, 4, 10), 0.0, 50.0, 45.0);
         List<Forecast> forecasts = beginningOfWeek.Concat(endOfWeek).ToList();
         forecasts.Add(dayOf);
@@ -120,7 +120,7 @@ public class ConditionsCheckerTests {
         DateOnly currentDate = new DateOnly(2025, 4, 1);
         DateOnly targetDate = new DateOnly(2025, 4, 10);
         List<WeatherHistory> histories = MakeHistories(new DateOnly(2025, 1, 1), 90, 0.0, 0.0);
-        List<Forecast> mostOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 8, 0.0, 12.0);
+        List<Forecast> mostOfWeek = MakeForecasts(new DateOnly(2025, 4, 1), 8, 0.0, 609.6);
         List<Forecast> twoDaysOf = MakeForecasts(new DateOnly(2025, 4, 9), 2, 0.0, 0.0);
         List<Forecast> forecasts = mostOfWeek.Concat(twoDaysOf).ToList();
         ConditionsReport _ = new ConditionsReport();
