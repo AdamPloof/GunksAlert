@@ -256,6 +256,8 @@ public class ConditionsChecker {
     /// <summary>
     /// Make an estimated guess about how much snow is on the ground as of current date based on snow in the past 90
     /// days minus melting.
+    /// 
+    /// TODO: This is not doing a great job -- it's over estimating snow pack quite dramatically.
     /// </summary>
     /// <param name="seasonHistory">The season's weather history, up to 90 days</param>
     /// <returns></returns>

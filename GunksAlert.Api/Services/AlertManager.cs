@@ -72,16 +72,6 @@ public class AlertManager {
 
     public void ProcessAlerts(Crag crag) {
         _logger.LogDebug("Processing alerts");
-        Dictionary<AppUser, List<Alert>> alertsByUser = GetAlertsByUser(crag);
-        foreach (KeyValuePair<AppUser, List<Alert>> entry in alertsByUser) {
-            _sender.SendAlerts(entry.Key, entry.Value);
-            _logger.LogDebug(
-                $"Alert sent for: {entry.Key.UserName} for {entry.Value[0].ForecastDate.ToString("yyyy-mm-dd")}"
-            );
-        }
-    }
-
-    public Dictionary<AppUser, List<Alert>> GetAlertsByUser(Crag crag) {
         Dictionary<AppUser, List<Alert>> userAlerts = [];
         DateOnly targetDate = DateOnly.FromDateTime(DateTime.Today).AddDays(1);
         for (int i = 0; i < 7; i++) {
@@ -96,8 +86,12 @@ public class AlertManager {
 
             targetDate = targetDate.AddDays(1);
         }
-
-        return userAlerts;
+        foreach (KeyValuePair<AppUser, List<Alert>> entry in userAlerts) {
+            _sender.SendAlerts(entry.Key, entry.Value);
+            _logger.LogDebug(
+                $"Alert sent for: {entry.Key.UserName} for {entry.Value[0].ForecastDate.ToString("yyyy-mm-dd")}"
+            );
+        }
     }
 
     public List<Alert> GetAlerts(DateOnly targetDate, Crag crag) {
@@ -124,6 +118,8 @@ public class AlertManager {
                 today,
                 targetDate
             );
+            _context.ConditionsReports.Add(report);
+            _context.SaveChanges();
 
             if (report.IsClimbable()) {
                 _logger.LogDebug($"{targetDate.ToString("yyyy-MM-dd")} is climbable, preparing alerts.");
