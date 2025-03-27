@@ -27,6 +27,11 @@ public class PasswordAuthenticationProvider : IAuthenticationProvider {
 
     public async Task<IdentityResult> RegisterAsync(string userIdentifier, string password) {
         var user = new AppUser() {UserName=userIdentifier};
-        return await _userManager.CreateAsync(user, password);
+        IdentityResult res = await _userManager.CreateAsync(user, password);
+        if (res.Succeeded) {
+            await _userManager.AddToRoleAsync(user, "User");
+        }
+
+        return res;
     }
 }

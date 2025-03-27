@@ -64,7 +64,13 @@ public class SecurityController : Controller {
 
         IdentityResult result = await _authProvider.RegisterAsync(model.Username, model.Password);
         if (result.Succeeded) {
-            return RedirectToAction("Index", "Home");
+            SignInResult signInRes = await _authProvider.LoginAsync(model.Username, model.Password);
+            if (signInRes.Succeeded) {
+                return RedirectToAction("Index", "Home");
+            } else {
+                // TODO: add flash message
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         foreach (IdentityError err in result.Errors) {
