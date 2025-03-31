@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using GunksAlert.Api.Data;
 using GunksAlert.Api.Models;
 using GunksAlert.Api.Services;
+using GunksAlert.Api.ViewModels;
 
 namespace GunksAlert.Api.Controllers;
 
@@ -24,6 +25,17 @@ public class AlertController : Controller {
         _conditionsChecker = conditionsChecker;
         _alertManager = alertManager;
         _logger = logger;
+    }
+
+    [Route("alert/sign-up", Name="AlertSignup")]
+    public IActionResult Signup(AlertSignupViewModel model) {
+        if (!ModelState.IsValid) {
+            return View(model);
+        }
+
+        // TODO: convert response to AlertCriteria
+
+        return View(model);
     }
 
     [Route("alert/process-alerts/{cragId}")]
